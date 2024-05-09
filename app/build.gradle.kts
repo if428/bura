@@ -20,7 +20,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.davidtakac.bura"
+        applicationId = "com.davidtakac.bura2"
         minSdk = 28
         targetSdk = 34
         versionCode = 13
