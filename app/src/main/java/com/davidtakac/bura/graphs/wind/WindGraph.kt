@@ -59,7 +59,7 @@ fun WindGraph(
 ) {
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val plotColors = AppTheme.colors.temperatureColors(0.0, max.value)
+    val plotColors = AppTheme.colors.windSpeedColors(0.0, max.toMetersPerSecond())
 
     Canvas(modifier) {
         drawWindAxis(

@@ -72,17 +72,21 @@ class WindSpeed private constructor(
             Unit.MilesPerHour -> "mi/h"
             Unit.Knots -> "kn"
         }
-        return "${String.format("%.2f", value)} $suffix ($beaufort bft)"
+        return "${String.format("%.1f", value)} $suffix ($beaufort Bft)"
     }
 
     fun toValueString(): String {
-        val result = value / when (unit) {
-            Unit.MetersPerSecond -> 1.0;
-            Unit.KilometersPerHour -> 3.6;
-            Unit.Knots -> 1.94384;
-            Unit.MilesPerHour -> 2.2369;
-        }
+        val result = this.toMetersPerSecond()
         return "${String.format("%.0f", result)}"
+    }
+
+    fun toMetersPerSecond(): Double {
+        return value / when (unit) {
+            Unit.MetersPerSecond -> 1.0
+            Unit.KilometersPerHour -> 3.6
+            Unit.Knots -> 1.94384
+            Unit.MilesPerHour -> 2.2369
+        }
     }
 
     companion object {

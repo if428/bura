@@ -18,6 +18,7 @@ import kotlin.math.roundToInt
 
 data class AppColors(
     private val temperatureColors: List<Color>,
+    private val windSpeedColorsMetersPerSecond: List<Color>,
     private val uvIndexColors: Map<Int, Color>,
     val popColor: Color,
     val rainColor: Color,
@@ -26,17 +27,23 @@ data class AppColors(
     val precipitationColor: Color,
 ) {
     fun temperatureColors(fromCelsius: Double, toCelsius: Double): List<Color> =
-        temperatureColors.slice(getIndexOfNearestColor(fromCelsius)..getIndexOfNearestColor(toCelsius))
+        temperatureColors.slice(getIndexOfNearestColorTemperature(fromCelsius)..getIndexOfNearestColorTemperature(toCelsius))
+
+    fun windSpeedColors(fromMetersPerSecond: Double, toMetersPerSecond: Double): List<Color> =
+        windSpeedColorsMetersPerSecond.slice(getIndexOfNearestColorWindSpeed(fromMetersPerSecond)..getIndexOfNearestColorWindSpeed(toMetersPerSecond))
 
     val uvIndexColorStops: List<Pair<Float, Color>>  get() =
         uvIndexColors.map { it.key / 11f to it.value }
 
-    private fun getIndexOfNearestColor(celsius: Double): Int =
+    private fun getIndexOfNearestColorWindSpeed(windSpeedMs: Double): Int =
+        windSpeedMs.roundToInt().coerceIn(0, 100)
+    private fun getIndexOfNearestColorTemperature(celsius: Double): Int =
         40 + celsius.roundToInt().coerceIn(-40, 55)
 
     companion object {
         val ForDarkTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
+            windSpeedColorsMetersPerSecond = darkWindSpeedColorsMetersPerSecond,
             uvIndexColors = darkUvIndexColors,
             popColor = Color(0xFF64B5F6),
             rainColor = Color(0xFF64B5F6),
@@ -47,6 +54,7 @@ data class AppColors(
 
         val ForLightTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
+            windSpeedColorsMetersPerSecond = darkWindSpeedColorsMetersPerSecond,
             uvIndexColors = darkUvIndexColors,
             popColor = Color(0xFF2196F3),
             rainColor = Color(0xFF2196F3),
@@ -60,6 +68,7 @@ data class AppColors(
 val LocalAppColors = staticCompositionLocalOf {
     AppColors(
         temperatureColors = listOf(),
+        windSpeedColorsMetersPerSecond = listOf(),
         popColor = Color.Unspecified,
         rainColor = Color.Unspecified,
         showersColor = Color.Unspecified,
@@ -68,6 +77,79 @@ val LocalAppColors = staticCompositionLocalOf {
         uvIndexColors = mapOf()
     )
 }
+
+private val darkWindSpeedColorsMetersPerSecond = listOf(
+    Color(113, 64, 158), // 0 m/s 0 Bft
+    Color(87, 76, 158), // 1 m/s 1 Bft
+    Color(95, 65, 158), // 2 m/s 2 Bft
+    Color(75, 75, 158), // 3 m/s
+    Color(65, 80, 158), // 4 m/s, 3 Bft
+    Color(70, 100, 158), // 5 m/s
+    Color(70, 120, 158), // 6 m/s, 4 Bft
+    Color(79, 139, 154), // 7 m/s
+    Color(30, 168, 80), // 8 m/s, 5 Bft
+    Color(53, 168, 70), // 9 m/s
+    Color(76, 168, 60), // 10 m/s
+    Color(100, 168, 50), // 11 m/s, 6 Bft
+    Color(148, 187, 65),
+    Color(195, 210, 79), // 13 m/s
+    Color(240, 240, 90), // 14 m/s, 7 Bft
+    Color(237, 210, 77),
+    Color(235, 180, 55), // 16 m/s
+    Color(240, 100, 45), // 17 m/s, 8 Bft
+    Color(230, 90, 35),
+    Color(220, 80, 25), // 20 m/s
+    Color(150, 50, 45), // 21 m/s, 9 Bft
+    Color(111, 40, 52), // 22 m/s
+    Color(94, 30, 58),  // 23 m/s
+    Color(65, 20, 65), // 24 m/s
+    Color(85, 20, 95), // 25 m/s, 10 Bft
+    Color(112, 45, 131), // 26 m/s
+    Color(139, 70, 168), // 27 m/s
+    Color(165, 95, 205), // 28 m/s
+    Color(200, 100, 220), // 29 m/s, 11 Bft
+    Color(215, 140, 230), // 30 m/s
+    Color(230, 180, 240), // 31 m/s
+    Color(245, 220, 250), // 32 m/s
+    Color(220, 220, 220), // 33 m/s, 12 Bft
+    Color(197, 197, 197), // 34 m/s
+    Color(164, 164, 164), // 35 m/s
+    Color(140, 140, 140), // 36 m/s
+    Color(117, 117, 117), // 37 m/s
+    Color(94, 94, 94), // 38 m/s
+    Color(70, 70, 70), // 39 m/s
+    Color(57, 57, 57), // 40 m/s
+    Color(34, 34, 34), // 41 m/s
+    Color(10, 10, 10), // 42 m/s
+    Color(20, 20, 20), // 43 m/s,
+    Color(53, 53, 40), // 44 m/s
+    Color(86, 86, 60), // 45 m/s
+    Color(119, 119, 80), // 46 m/s
+    Color(152, 152, 100), // 47 m/s
+    Color(185, 185, 120), // 48 m/s
+    Color(195, 215, 135), // 49 m/s
+    Color(173, 194, 124), // 50 m/s
+    Color(151, 173, 113), // 51 m/s
+    Color(130, 153, 103), // 52 m/s
+    Color(108, 132, 92), // 53 m/s
+    Color(86, 111, 81), // 54 m/s
+    Color(64, 90, 71), // 55 m/s
+    Color(42, 70, 60), // 56 m/s
+    Color(20, 50, 50), // 57 m/s
+    Color(15, 35, 40), // 58 m/s
+    Color(51, 52, 56), // 59 m/s
+    Color(87, 69, 72), // 60 m/s
+    Color(122, 85, 87), // 61 m/s
+    Color(157, 102, 103), // 62 m/s
+    Color(195, 119, 119), // 63 m/s
+    Color(230, 135, 135), // 64 m/s
+    Color(201, 118, 117), // 65 m/s
+    Color(172, 101, 99), // 66 m/s
+    Color(143, 84, 81), // 67 m/s
+    Color(114, 67, 63), // 68 m/s
+    Color(85, 50, 45), // 69 m/s
+    Color(75, 40, 35), // 70 m/s
+)
 
 private val darkTemperatureColors = listOf(
     Color(240, 240, 180), //  54...53
