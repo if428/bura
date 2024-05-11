@@ -218,4 +218,5 @@
     <string name="wmo_95">Гроза</string>
     <string name="wmo_96">Гроза с мелким градом</string>
     <string name="wmo_99">Гроза с крупным градом</string>
+    <string name="windCaption">Wind</string>
 </resources>

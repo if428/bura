@@ -218,4 +218,5 @@
     <string name="wmo_95">Sấm sét</string>
     <string name="wmo_96">Dông kèm mưa đá nhẹ</string>
     <string name="wmo_99">Dông kèm mưa đá lớn</string>
+    <string name="windCaption">Wind</string>
 </resources>

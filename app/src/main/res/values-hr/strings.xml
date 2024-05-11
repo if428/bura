@@ -203,4 +203,5 @@
     <string name="wmo_99">Oluja s jakom tučom</string>
     <string name="general_btn_dialog_confirm">OK</string>
     <string name="general_btn_dialog_cancel">Odustani</string>
+    <string name="windCaption">Wind</string>
 </resources>

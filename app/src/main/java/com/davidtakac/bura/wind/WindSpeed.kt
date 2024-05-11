@@ -75,6 +75,16 @@ class WindSpeed private constructor(
         return "${String.format("%.2f", value)} $suffix ($beaufort bft)"
     }
 
+    fun toValueString(): String {
+        val result = value / when (unit) {
+            Unit.MetersPerSecond -> 1.0;
+            Unit.KilometersPerHour -> 3.6;
+            Unit.Knots -> 1.94384;
+            Unit.MilesPerHour -> 2.2369;
+        }
+        return "${String.format("%.0f", result)}"
+    }
+
     companion object {
         fun fromMetersPerSecond(value: Double): WindSpeed = WindSpeed(
             metersPerSecond = value,

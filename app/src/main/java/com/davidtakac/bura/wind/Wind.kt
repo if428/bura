@@ -16,6 +16,7 @@ import java.util.Objects
 
 class Wind(
     val speed: WindSpeed,
+    val gusts: WindSpeed,
     val from: WindDirection
 ) {
     val to: WindDirection = WindDirection(degrees = from.degrees + 180)
@@ -25,5 +26,5 @@ class Wind(
 
     override fun hashCode(): Int = Objects.hash(speed, from)
 
-    override fun toString(): String = "$speed from $from"
+    override fun toString(): String = "$speed, $gusts from $from"
 }

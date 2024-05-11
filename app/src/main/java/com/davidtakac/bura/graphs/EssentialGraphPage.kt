@@ -44,9 +44,11 @@ import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
 import com.davidtakac.bura.graphs.temperature.TemperatureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
+import com.davidtakac.bura.graphs.wind.WindGraph
 import com.davidtakac.bura.precipitation.MixedPrecipitation
 import com.davidtakac.bura.summary.now.NowSummarySkeleton
 import com.davidtakac.bura.temperature.Temperature
+import com.davidtakac.bura.wind.WindSpeed
 
 private const val graphAspectRatio = 4f / 3f
 private val contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
@@ -65,7 +67,10 @@ fun EssentialGraphPage(
     precipGraph: PrecipitationGraph,
     precipArgs: GraphArgs,
     precipMax: MixedPrecipitation,
-    precipitationTotal: PrecipitationTotal
+    precipitationTotal: PrecipitationTotal,
+    maxWindGusts: WindSpeed,
+    windArgs: GraphArgs,
+    windGraph: WindGraph
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
@@ -142,6 +147,25 @@ fun EssentialGraphPage(
                 is PrecipitationTotal.Today -> TodayPrecipitationBullets(
                     state = precipitationTotal,
                     modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(graphLabelSpacing)) {
+                GraphScreenSectionLabel(text = stringResource(id = R.string.windCaption))
+                WindGraph(
+                    state = windGraph,
+                    max = maxWindGusts,
+                    args = windArgs,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(graphAspectRatio)
+                        .border(
+                            width = Dp.Hairline,
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        .clip(MaterialTheme.shapes.large)
                 )
             }
         }

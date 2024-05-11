@@ -28,6 +28,8 @@ import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphSummaries
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphs
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphs
+import com.davidtakac.bura.graphs.wind.GetWindGraphs
+import com.davidtakac.bura.graphs.wind.WindGraphs
 import com.davidtakac.bura.place.selected.SelectedPlaceRepository
 import com.davidtakac.bura.units.SelectedUnitsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +44,8 @@ class EssentialGraphsViewModel(
     private val getTempGraphs: GetTemperatureGraphs,
     private val getPopGraphs: GetPopGraphs,
     private val getPrecipGraphs: GetPrecipitationGraphs,
-    private val getPrecipTotals: GetPrecipitationTotals
+    private val getPrecipTotals: GetPrecipitationTotals,
+    private val getWindGraphs: GetWindGraphs,
 ) : ViewModel() {
     private val _state = MutableStateFlow<EssentialGraphsState>(EssentialGraphsState.Loading)
     val state = _state.asStateFlow()
@@ -97,12 +100,20 @@ class EssentialGraphsViewModel(
             is ForecastResult.Success -> Unit
         }
 
+        val windGraphs = getWindGraphs(coords, units, now)
+        when (windGraphs) {
+            ForecastResult.FailedToDownload -> return EssentialGraphsState.FailedToDownload
+            ForecastResult.Outdated -> return EssentialGraphsState.Outdated
+            is ForecastResult.Success -> Unit
+        }
+
         return EssentialGraphsState.Success(
             tempGraphSummaries = tempGraphSummaries.data,
             tempGraphs = tempGraphs.data,
             popGraphs = popGraphs.data,
             precipGraphs = precipGraphs.data,
-            precipTotals = precipTotals.data
+            precipTotals = precipTotals.data,
+            windGraphs = windGraphs.data
         )
     }
 
@@ -112,13 +123,14 @@ class EssentialGraphsViewModel(
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val container = (checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]) as App).container
                 return EssentialGraphsViewModel(
-                    container.selectedPlaceRepo,
-                    container.selectedUnitsRepo,
-                    container.getTemperatureGraphSummaries,
-                    container.getTemperatureGraphs,
-                    container.getPopGraphs,
-                    container.getPrecipitationGraphs,
-                    container.getPrecipitationTotals
+                    placeRepo = container.selectedPlaceRepo,
+                    unitsRepo = container.selectedUnitsRepo,
+                    getTempGraphSummaries = container.getTemperatureGraphSummaries,
+                    getTempGraphs = container.getTemperatureGraphs,
+                    getPopGraphs = container.getPopGraphs,
+                    getPrecipGraphs = container.getPrecipitationGraphs,
+                    getPrecipTotals = container.getPrecipitationTotals,
+                    getWindGraphs = container.getWindGraphs
                 ) as T
             }
         }
@@ -131,7 +143,8 @@ sealed interface EssentialGraphsState {
         val tempGraphs: TemperatureGraphs,
         val popGraphs: List<PopGraph>,
         val precipGraphs: PrecipitationGraphs,
-        val precipTotals: List<PrecipitationTotal>
+        val precipTotals: List<PrecipitationTotal>,
+        val windGraphs: WindGraphs
     ) : EssentialGraphsState
 
     data object Loading : EssentialGraphsState

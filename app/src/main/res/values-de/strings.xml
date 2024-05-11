@@ -218,4 +218,5 @@
     <string name="wmo_95">Gewitter</string>
     <string name="wmo_96">Gewitter mit leichtem Hagel</string>
     <string name="wmo_99">Gewitter mit schwerem Hagel</string>
+    <string name="windCaption">Wind</string>
 </resources>

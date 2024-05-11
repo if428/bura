@@ -218,4 +218,5 @@
     <string name="wmo_95">Orage</string>
     <string name="wmo_96">Orage avec légère grêle</string>
     <string name="wmo_99">Orage avec forte grêle</string>
+    <string name="windCaption">Vent</string>
 </resources>
