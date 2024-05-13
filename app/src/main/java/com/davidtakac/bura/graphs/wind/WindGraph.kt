@@ -13,7 +13,8 @@
 package com.davidtakac.bura.graphs.wind
 
 import android.content.Context
-import android.util.Log
+import android.graphics.Bitmap
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -37,7 +39,11 @@ import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import com.davidtakac.bura.R
 import com.davidtakac.bura.common.AppTheme
 import com.davidtakac.bura.graphs.common.GraphArgs
 import com.davidtakac.bura.graphs.common.GraphTime
@@ -45,6 +51,7 @@ import com.davidtakac.bura.graphs.common.drawLabeledPoint
 import com.davidtakac.bura.graphs.common.drawPastOverlayWithPoint
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
+import com.davidtakac.bura.wind.WindDirection
 import com.davidtakac.bura.wind.WindSpeed
 import java.time.LocalDate
 import java.time.LocalTime
@@ -59,11 +66,12 @@ fun WindGraph(
 ) {
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val plotColors = AppTheme.colors.windSpeedColors(0.0, max.toMetersPerSecond())
+    val maxYAxisValue = WindSpeed.addFraction(max, 7.0)
+    val plotColors = AppTheme.colors.windSpeedColors(0.0, maxYAxisValue.toMetersPerSecond())
 
     Canvas(modifier) {
         drawWindAxis(
-            max = max,
+            max = maxYAxisValue,
             context = context,
             measurer = measurer,
             args = args
@@ -71,7 +79,7 @@ fun WindGraph(
         drawHorizontalAxisAndPlot(
             state = state,
             plotColors = plotColors,
-            maxWindSpeed = max,
+            maxWindSpeed = maxYAxisValue,
             context = context,
             measurer = measurer,
             args = args
@@ -130,16 +138,22 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         if (windGusts.meta == GraphWindGust.Meta.Maximum) maxCenter = Offset(x, yWindGusts) to windGusts
         if (point.time.meta == GraphTime.Meta.Present) nowCenter = Offset(x, yWindGusts)
 
-        // TODO: Wind direction indicators
-//        if (i % (if (hasSpaceFor12Icons) 2 else 3) == 1) {
-//            val iconX = x - (iconSize / 2)
-//            val iconDrawable = AppCompatResources.getDrawable(context, point.condition.image(context, args.icons))!!
-//            drawImage(
-//                image = iconDrawable.toBitmap(width = iconSizeRound, height = iconSizeRound).asImageBitmap(),
-//                dstOffset = IntOffset(iconX.roundToInt(), y = iconY),
-//                dstSize = IntSize(width = iconSizeRound, height = iconSizeRound),
-//            )
-//        }
+        // Wind direction indicators
+        val drawable = AppCompatResources.getDrawable(context, R.drawable.navigation_black)
+        val bitmap = drawable!!.toBitmap(width = iconSizeRound, height = iconSizeRound, config = Bitmap.Config.ARGB_8888)
+        val destBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
+        val tmpCanvas = android.graphics.Canvas(destBitmap)
+        tmpCanvas.rotate(point.direction.degrees.toFloat() + 180f, bitmap.width / 2f, bitmap.height / 2f)
+        tmpCanvas.drawBitmap(bitmap, 0f, 0f, null)
+
+        if (i % (if (hasSpaceFor12Icons) 2 else 3) == 1) {
+            val iconX = x - (iconSize / 2)
+            drawImage(
+                image = destBitmap.asImageBitmap(),
+                dstOffset = IntOffset(iconX.roundToInt(), y = iconY),
+                dstSize = IntSize(width = iconSizeRound, height = iconSizeRound),
+            )
+        }
     }
     val gradientStart = size.height - args.bottomGutter
     val gradientEnd = args.topGutter
@@ -165,7 +179,7 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
                 endY = gradientEnd
             ),
             style = Stroke(
-                width = 2*density,
+                width = 2.667f*density,
                 join = StrokeJoin.Round,
                 cap = StrokeCap.Square
             )
@@ -216,12 +230,10 @@ private fun DrawScope.drawWindAxis(
         steps = 7,
         args = args
     ) { frac, endX, y ->
-        Log.i("WindGraph", "max unit: ${max.unit} $frac ${range.value}")
         val windSpeed =
             WindSpeed.fromMetersPerSecond(value = range.value * frac)
                 .convertTo(max.unit)
 
-        Log.i("WindGraph", "wind speed: ${windSpeed.toValueString()}")
         val valueString = windSpeed.toValueString()
         val labelString = measurer.measure(
             text = valueString,
@@ -309,6 +321,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(2.2),
+            direction = WindDirection(0.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(4.5), meta = GraphWindGust.Meta.Regular),
         ),
         WindGraphPoint(
@@ -317,6 +330,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(3.8),
+            direction = WindDirection(10.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(6.5), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -325,6 +339,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(8.9),
+            direction = WindDirection(20.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(12.4), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -333,6 +348,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(11.4),
+            direction = WindDirection(30.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(15.2), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -341,6 +357,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(14.9),
+            direction = WindDirection(45.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(19.5), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -349,6 +366,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(16.4),
+            direction = WindDirection(60.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(20.5), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -357,6 +375,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(19.3),
+            direction = WindDirection(75.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(24.7), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -365,6 +384,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(90.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -373,6 +393,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(24.1),
+            direction = WindDirection(105.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(35.1), meta = GraphWindGust.Meta.Maximum)
         ),
         WindGraphPoint(
@@ -381,6 +402,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(120.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -389,6 +411,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(135.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -397,6 +420,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(150.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -405,6 +429,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(165.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -413,6 +438,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(180.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -421,6 +447,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(195.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -429,6 +456,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(210.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -437,6 +465,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(225.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -445,6 +474,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(240.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -453,6 +483,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(255.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -461,6 +492,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(270.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -469,6 +501,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(285.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -477,6 +510,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(300.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -485,6 +519,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(315.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -493,6 +528,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(330.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
         WindGraphPoint(
@@ -501,6 +537,7 @@ private val previewState = WindGraph(
                 meta = GraphTime.Meta.Past
             ),
             windSpeed = WindSpeed.fromMetersPerSecond(22.1),
+            direction = WindDirection(345.0),
             gusts = GraphWindGust(value = WindSpeed.fromMetersPerSecond(34.1), meta = GraphWindGust.Meta.Regular)
         ),
     )

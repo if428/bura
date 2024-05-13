@@ -12,15 +12,12 @@
 
 package com.davidtakac.bura.graphs.wind
 
-import android.util.Log
 import com.davidtakac.bura.forecast.ForecastResult
 import com.davidtakac.bura.graphs.common.GraphTime
-import com.davidtakac.bura.gust.GustMoment
 import com.davidtakac.bura.gust.GustRepository
 import com.davidtakac.bura.place.Coordinates
-import com.davidtakac.bura.precipitation.MixedPrecipitation
-import com.davidtakac.bura.temperature.Temperature
 import com.davidtakac.bura.units.Units
+import com.davidtakac.bura.wind.WindDirection
 import com.davidtakac.bura.wind.WindRepository
 import com.davidtakac.bura.wind.WindSpeed
 import java.time.LocalDate
@@ -54,6 +51,7 @@ class GetWindGraphs(
                                             now = now
                                         ),
                                         windSpeed = moment.wind.speed,
+                                        direction = moment.wind.direction,
                                         gusts = GraphWindGust(value = moment.wind.gusts, meta = if(moment.wind.gusts == day.maxOf { it.wind.gusts }) GraphWindGust.Meta.Maximum else GraphWindGust.Meta.Regular)
                                     )
                                 }
@@ -79,7 +77,8 @@ data class WindGraph(
 data class WindGraphPoint(
     val time: GraphTime,
     val windSpeed: WindSpeed,
-    val gusts: GraphWindGust
+    val gusts: GraphWindGust,
+    val direction: WindDirection
 )
 
 data class GraphWindGust(

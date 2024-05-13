@@ -16,7 +16,7 @@ import java.util.Objects
 
 class WindSpeed private constructor(
     private val metersPerSecond: Double,
-    val value: Double,
+    var value: Double,
     val unit: Unit
 ) : Comparable<WindSpeed> {
     val beaufort: Int = when {
@@ -95,5 +95,17 @@ class WindSpeed private constructor(
             value = value,
             unit = Unit.MetersPerSecond
         )
+
+        fun addFraction(windSpeed: WindSpeed, frac: Double): WindSpeed {
+            val windSpeedMetersPerSecond = windSpeed.toMetersPerSecond()
+            val newValueMetersPerSecond = windSpeedMetersPerSecond + (windSpeedMetersPerSecond / frac)
+            val result = when(windSpeed.unit) {
+                WindSpeed.Unit.MetersPerSecond -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.MetersPerSecond)
+                WindSpeed.Unit.KilometersPerHour -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.KilometersPerHour)
+                WindSpeed.Unit.MilesPerHour -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.MilesPerHour)
+                WindSpeed.Unit.Knots -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.Knots)
+            }
+            return result
+        }
     }
 }
