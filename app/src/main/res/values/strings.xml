@@ -219,4 +219,5 @@
     <string name="wmo_96">Thunderstorm with light hail</string>
     <string name="wmo_99">Thunderstorm with heavy hail</string>
     <string name="windCaption">Wind</string>
+    <string name="pressure_caption">Air Pressure</string>
 </resources>

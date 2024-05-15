@@ -177,7 +177,7 @@ fun EssentialGraphPage(
         }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(graphLabelSpacing)) {
-                GraphScreenSectionLabel(text = stringResource(id = R.string.windCaption))
+                GraphScreenSectionLabel(text = stringResource(id = R.string.pressure_caption))
                 PressureGraph(
                     state = pressureGraph,
                     min = minPressure,

@@ -219,4 +219,5 @@
     <string name="wmo_96">雷暴雨夹冰雹</string>
     <string name="wmo_99">雷暴雨夹大冰雹</string>
     <string name="windCaption">Wind</string>
+    <string name="pressure_caption">Air Pressure</string>
 </resources>

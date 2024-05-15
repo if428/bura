@@ -32,7 +32,7 @@
     <string name="delete_place_value">%s löschen?</string>
     <string name="delete_place_description">Dabei werden auch die zwischengespeicherten Prognosedaten gelöscht.</string>
 
-    <string name="cond_screen_title">Bedingungen</string>
+    <string name="cond_screen_title">Vorhersage</string>
     <string name="cond_screen_pop">Niederschlagswahrscheinlichkeit</string>
     <string name="cond_screen_precip">Gesamtniederschlag</string>
     <string name="cond_screen_temp_unit_celsius">Celsius (°C)</string>
@@ -219,4 +219,5 @@
     <string name="wmo_96">Gewitter mit leichtem Hagel</string>
     <string name="wmo_99">Gewitter mit schwerem Hagel</string>
     <string name="windCaption">Wind</string>
+    <string name="pressure_caption">Luftdruck</string>
 </resources>
