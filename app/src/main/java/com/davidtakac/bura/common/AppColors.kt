@@ -268,15 +268,16 @@ private val darkWindSpeedColorsMetersPerSecond = listOf(
     Color(148, 187, 65),
     Color(195, 210, 79), // 13 m/s
     Color(240, 240, 90), // 14 m/s, 7 Bft
-    Color(237, 210, 77),
-    Color(235, 180, 55), // 16 m/s
-    Color(240, 100, 45), // 17 m/s, 8 Bft
-    Color(230, 90, 35),
-    Color(220, 80, 25), // 20 m/s
-    Color(150, 50, 45), // 21 m/s, 9 Bft
-    Color(111, 40, 52), // 22 m/s
-    Color(94, 30, 58),  // 23 m/s
-    Color(65, 20, 65), // 24 m/s
+    Color(237, 220, 77),
+    Color(235, 200, 55), // 16 m/s
+    Color(240, 150, 45), // 17 m/s, 8 Bft
+    Color(235, 140, 40),
+    Color(230, 130, 35),
+    Color(220, 110, 25), // 20 m/s
+    Color(185, 90, 45), // 21 m/s, 9 Bft
+    Color(160, 40, 52), // 22 m/s
+    Color(135, 30, 58),  // 23 m/s
+    Color(110, 20, 65), // 24 m/s
     Color(85, 20, 95), // 25 m/s, 10 Bft
     Color(112, 45, 131), // 26 m/s
     Color(139, 70, 168), // 27 m/s
