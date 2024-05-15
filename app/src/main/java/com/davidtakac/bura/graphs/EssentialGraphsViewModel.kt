@@ -24,6 +24,8 @@ import com.davidtakac.bura.graphs.precipitation.GetPrecipitationGraphs
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
 import com.davidtakac.bura.graphs.precipitation.GetPrecipitationTotals
 import com.davidtakac.bura.graphs.precipitation.PrecipitationGraphs
+import com.davidtakac.bura.graphs.pressure.GetPressureGraphs
+import com.davidtakac.bura.graphs.pressure.PressureGraphs
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphSummaries
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphs
@@ -46,6 +48,7 @@ class EssentialGraphsViewModel(
     private val getPrecipGraphs: GetPrecipitationGraphs,
     private val getPrecipTotals: GetPrecipitationTotals,
     private val getWindGraphs: GetWindGraphs,
+    private val getPressureGraphs: GetPressureGraphs
 ) : ViewModel() {
     private val _state = MutableStateFlow<EssentialGraphsState>(EssentialGraphsState.Loading)
     val state = _state.asStateFlow()
@@ -107,13 +110,21 @@ class EssentialGraphsViewModel(
             is ForecastResult.Success -> Unit
         }
 
+        val pressureGraphs = getPressureGraphs(coords, units, now)
+        when (pressureGraphs) {
+            ForecastResult.FailedToDownload -> return EssentialGraphsState.FailedToDownload
+            ForecastResult.Outdated -> return EssentialGraphsState.Outdated
+            is ForecastResult.Success -> Unit
+        }
+
         return EssentialGraphsState.Success(
             tempGraphSummaries = tempGraphSummaries.data,
             tempGraphs = tempGraphs.data,
             popGraphs = popGraphs.data,
             precipGraphs = precipGraphs.data,
             precipTotals = precipTotals.data,
-            windGraphs = windGraphs.data
+            windGraphs = windGraphs.data,
+            pressureGraphs = pressureGraphs.data
         )
     }
 
@@ -130,7 +141,8 @@ class EssentialGraphsViewModel(
                     getPopGraphs = container.getPopGraphs,
                     getPrecipGraphs = container.getPrecipitationGraphs,
                     getPrecipTotals = container.getPrecipitationTotals,
-                    getWindGraphs = container.getWindGraphs
+                    getWindGraphs = container.getWindGraphs,
+                    getPressureGraphs = container.getPressureGraphs
                 ) as T
             }
         }
@@ -144,7 +156,8 @@ sealed interface EssentialGraphsState {
         val popGraphs: List<PopGraph>,
         val precipGraphs: PrecipitationGraphs,
         val precipTotals: List<PrecipitationTotal>,
-        val windGraphs: WindGraphs
+        val windGraphs: WindGraphs,
+        val pressureGraphs: PressureGraphs,
     ) : EssentialGraphsState
 
     data object Loading : EssentialGraphsState

@@ -114,6 +114,7 @@ private fun Pager(
         val summaries = state.tempGraphSummaries
         val tempGraphs = state.tempGraphs
         val windGraphs = state.windGraphs
+        val pressureGraphs = state.pressureGraphs
         val dates = remember(summaries) { summaries.map { it.day } }
         val pagerState = rememberPagerState(initialPage = initialDay?.let { dates.indexOf(it) } ?: 0) { summaries.size }
         val scope = rememberCoroutineScope()
@@ -142,7 +143,11 @@ private fun Pager(
                 precipitationTotal = state.precipTotals[page],
                 windGraph = windGraphs.graphs[page],
                 maxWindGusts = windGraphs.max,
-                windArgs = GraphArgs.rememberWindArgs()
+                windArgs = GraphArgs.rememberWindArgs(),
+                minPressure = pressureGraphs.min,
+                maxPressure = pressureGraphs.max,
+                pressureArgs = GraphArgs.rememberPressureArgs(),
+                pressureGraph = pressureGraphs.graphs[page],
             )
         }
     }

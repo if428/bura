@@ -42,10 +42,12 @@ import com.davidtakac.bura.graphs.precipitation.PrecipitationBullets
 import com.davidtakac.bura.graphs.precipitation.PrecipitationGraph
 import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
+import com.davidtakac.bura.graphs.pressure.PressureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.wind.WindGraph
 import com.davidtakac.bura.precipitation.MixedPrecipitation
+import com.davidtakac.bura.pressure.Pressure
 import com.davidtakac.bura.summary.now.NowSummarySkeleton
 import com.davidtakac.bura.temperature.Temperature
 import com.davidtakac.bura.wind.WindSpeed
@@ -70,7 +72,11 @@ fun EssentialGraphPage(
     precipitationTotal: PrecipitationTotal,
     maxWindGusts: WindSpeed,
     windArgs: GraphArgs,
-    windGraph: WindGraph
+    windGraph: WindGraph,
+    minPressure: Pressure,
+    maxPressure: Pressure,
+    pressureArgs: GraphArgs,
+    pressureGraph: PressureGraph
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
@@ -157,6 +163,26 @@ fun EssentialGraphPage(
                     state = windGraph,
                     max = maxWindGusts,
                     args = windArgs,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(graphAspectRatio)
+                        .border(
+                            width = Dp.Hairline,
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        .clip(MaterialTheme.shapes.large)
+                )
+            }
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(graphLabelSpacing)) {
+                GraphScreenSectionLabel(text = stringResource(id = R.string.windCaption))
+                PressureGraph(
+                    state = pressureGraph,
+                    min = minPressure,
+                    max = maxPressure,
+                    args = pressureArgs,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(graphAspectRatio)

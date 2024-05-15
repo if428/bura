@@ -19,6 +19,7 @@ import kotlin.math.roundToInt
 data class AppColors(
     private val temperatureColors: List<Color>,
     private val windSpeedColorsMetersPerSecond: List<Color>,
+    private val pressureColorsHectopascal: List<Color>,
     private val uvIndexColors: Map<Int, Color>,
     val popColor: Color,
     val rainColor: Color,
@@ -32,9 +33,15 @@ data class AppColors(
     fun windSpeedColors(fromMetersPerSecond: Double, toMetersPerSecond: Double): List<Color> =
         windSpeedColorsMetersPerSecond.slice(getIndexOfNearestColorWindSpeed(fromMetersPerSecond)..getIndexOfNearestColorWindSpeed(toMetersPerSecond))
 
+    fun pressureColors(fromHectopascal: Double, toHectopascal: Double): List<Color> =
+        pressureColorsHectopascal.slice(getIndexOfNearestColorPressure(fromHectopascal)..getIndexOfNearestColorPressure(toHectopascal))
+
+
     val uvIndexColorStops: List<Pair<Float, Color>>  get() =
         uvIndexColors.map { it.key / 11f to it.value }
 
+    private fun getIndexOfNearestColorPressure(pressureHectopascal: Double): Int =
+        pressureHectopascal.roundToInt().coerceIn(920, 1080) - 920
     private fun getIndexOfNearestColorWindSpeed(windSpeedMs: Double): Int =
         windSpeedMs.roundToInt().coerceIn(0, 100)
     private fun getIndexOfNearestColorTemperature(celsius: Double): Int =
@@ -44,6 +51,7 @@ data class AppColors(
         val ForDarkTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
             windSpeedColorsMetersPerSecond = darkWindSpeedColorsMetersPerSecond,
+            pressureColorsHectopascal = darkPressureColorsHectopascal,
             uvIndexColors = darkUvIndexColors,
             popColor = Color(0xFF64B5F6),
             rainColor = Color(0xFF64B5F6),
@@ -55,6 +63,7 @@ data class AppColors(
         val ForLightTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
             windSpeedColorsMetersPerSecond = darkWindSpeedColorsMetersPerSecond,
+            pressureColorsHectopascal = darkPressureColorsHectopascal,
             uvIndexColors = darkUvIndexColors,
             popColor = Color(0xFF2196F3),
             rainColor = Color(0xFF2196F3),
@@ -69,6 +78,7 @@ val LocalAppColors = staticCompositionLocalOf {
     AppColors(
         temperatureColors = listOf(),
         windSpeedColorsMetersPerSecond = listOf(),
+        pressureColorsHectopascal = listOf(),
         popColor = Color.Unspecified,
         rainColor = Color.Unspecified,
         showersColor = Color.Unspecified,
@@ -77,6 +87,170 @@ val LocalAppColors = staticCompositionLocalOf {
         uvIndexColors = mapOf()
     )
 }
+
+private val darkPressureColorsHectopascal = listOf(
+    Color(190, 190, 190), // 920
+    Color(187, 187, 187),
+    Color(184, 184, 184),
+    Color(181, 181, 181),
+    Color(178, 178, 178),
+    Color(175, 175, 175), // 925
+    Color(172, 172, 172),
+    Color(169, 169, 169),
+    Color(166, 166, 166),
+    Color(163, 163, 163),
+    Color(160, 160, 160), // 930
+    Color(157, 157, 157),
+    Color(154, 154, 154),
+    Color(151, 151, 151),
+    Color(148, 148, 148),
+    Color(145, 145, 145), // 935
+    Color(142, 142, 142),
+    Color(139, 139, 139),
+    Color(136, 136, 136),
+    Color(133, 133, 133),
+    Color(130, 130, 130), // 940
+    Color(127, 124, 127),
+    Color(124, 118, 124),
+    Color(121, 112, 121),
+    Color(118, 106, 118),
+    Color(115, 100, 115), // 945
+    Color(112, 94, 112),
+    Color(109, 88, 109),
+    Color(106, 82, 106),
+    Color(103, 76, 103),
+    Color(100, 70, 100), // 950
+    Color(97, 64, 97),
+    Color(94, 58, 94),
+    Color(91, 52, 91),
+    Color(88, 46, 88),
+    Color(85, 40, 85), // 955
+    Color(82, 34, 82),
+    Color(79, 28, 79),
+    Color(76, 22, 76),
+    Color(73, 16, 73),
+    Color(70, 10, 70), // 960
+    Color(80, 13, 80),
+    Color(90, 16, 90),
+    Color(100, 19, 100),
+    Color(110, 22, 110),
+    Color(120, 25, 120), // 965
+    Color(130, 28, 130),
+    Color(140, 31, 140),
+    Color(150, 34, 150),
+    Color(160, 37, 160),
+    Color(170, 40, 170), // 970
+    Color(148, 40, 167),
+    Color(136, 40, 164),
+    Color(124, 40, 161),
+    Color(112, 40, 158),
+    Color(100, 40, 155), // 975
+    Color(88, 40, 152),
+    Color(76, 40, 149),
+    Color(64, 40, 146),
+    Color(52, 40, 143),
+    Color(40, 40, 140), // 980
+    Color(44, 44, 150),
+    Color(48, 48, 160),
+    Color(52, 52, 170),
+    Color(56, 56, 180),
+    Color(60, 60, 190), // 985
+    Color(64, 64, 200),
+    Color(68, 68, 210),
+    Color(72, 72, 220),
+    Color(76, 76, 230),
+    Color(80, 80, 240), // 990
+    Color(80, 92, 236),
+    Color(80, 104, 232),
+    Color(80, 116, 228),
+    Color(80, 128, 224),
+    Color(80, 140, 220), // 995
+    Color(80, 152, 216),
+    Color(80, 164, 212),
+    Color(80, 176, 208),
+    Color(80, 188, 204),
+    Color(80, 200, 200), // 1000
+    Color(80, 198, 188),
+    Color(80, 196, 176),
+    Color(80, 194, 164),
+    Color(80, 192, 152),
+    Color(80, 190, 140), // 1005
+    Color(80, 188, 128),
+    Color(80, 186, 116),
+    Color(80, 184, 104),
+    Color(80, 182, 92),
+    Color(80, 180, 80), // 1010
+    Color(90, 185, 80),
+    Color(100, 190, 80),
+    Color(150, 195, 80),
+    Color(200, 200, 80), // 1014
+    Color(200, 192, 80), // 1015
+    Color(200, 184, 80),
+    Color(200, 175, 80),
+    Color(200, 167, 80),
+    Color(200, 158, 80),
+    Color(200, 150, 80), // 1020
+    Color(200, 143, 80),
+    Color(200, 136, 80),
+    Color(200, 129, 80),
+    Color(200, 122, 80),
+    Color(200, 115, 80), // 1025
+    Color(200, 108, 80),
+    Color(200, 101, 80),
+    Color(200, 94, 80),
+    Color(200, 87, 80),
+    Color(200, 80, 80), // 1030
+    Color(196, 80, 80),
+    Color(192, 80, 80),
+    Color(188, 80, 80),
+    Color(184, 80, 80),
+    Color(180, 80, 80), // 1035
+    Color(176, 80, 80),
+    Color(172, 80, 80),
+    Color(168, 80, 80),
+    Color(164, 80, 80),
+    Color(160, 80, 80), // 1040
+    Color(162, 80, 88),
+    Color(164, 80, 96),
+    Color(166, 80, 104),
+    Color(168, 80, 112),
+    Color(170, 80, 120), // 1045
+    Color(172, 80, 128),
+    Color(174, 80, 136),
+    Color(176, 80, 144),
+    Color(178, 80, 152),
+    Color(180, 80, 160), // 1050
+    Color(170, 73, 151),
+    Color(160, 66, 142),
+    Color(150, 59, 133),
+    Color(140, 52, 124),
+    Color(130, 45, 115), // 1055
+    Color(120, 38, 106),
+    Color(110, 31, 97),
+    Color(100, 24, 88),
+    Color(90, 17, 79),
+    Color(80, 10, 70), // 1060
+    Color(82, 16, 73),
+    Color(85, 22, 76),
+    Color(87, 28, 79),
+    Color(90, 34, 82),
+    Color(92, 40, 85), // 1065
+    Color(95, 46, 88),
+    Color(97, 52, 91),
+    Color(100, 58, 94),
+    Color(102, 64, 97),
+    Color(105, 70, 100), // 1070
+    Color(107, 76, 103),
+    Color(110, 82, 106),
+    Color(112, 88, 109),
+    Color(115, 94, 112),
+    Color(117, 100, 115), // 1075
+    Color(120, 106, 118),
+    Color(122, 112, 121),
+    Color(125, 118, 124),
+    Color(127, 124, 127),
+    Color(130, 130, 130) // 1080
+)
 
 private val darkWindSpeedColorsMetersPerSecond = listOf(
     Color(113, 64, 158), // 0 m/s 0 Bft

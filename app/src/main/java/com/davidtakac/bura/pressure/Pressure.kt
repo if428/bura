@@ -38,6 +38,15 @@ class Pressure private constructor(
         ).convertTo(unit)
     }
 
+    operator fun minus(other: Pressure): Pressure {
+        val difference = hectopascal - other.hectopascal
+        return Pressure(
+            hectopascal = difference,
+            value = difference,
+            unit = Unit.Hectopascal
+        ).convertTo(unit)
+    }
+
     operator fun div(other: Int): Pressure {
         val result = hectopascal / other
         return Pressure(
@@ -46,6 +55,20 @@ class Pressure private constructor(
             unit = Unit.Hectopascal
         ).convertTo(unit)
     }
+
+    fun toHectopascal(): Double {
+        return value / when (unit) {
+            Pressure.Unit.Hectopascal -> 1.0
+            Pressure.Unit.InchesOfMercury -> 0.02953
+            Pressure.Unit.MillimetersOfMercury -> 0.750062
+        }
+    }
+
+    fun toValueString(): String {
+        val result = this.toHectopascal()
+        return "${String.format("%.0f", result)}"
+    }
+
 
     override fun compareTo(other: Pressure): Int =
         hectopascal.compareTo(other.hectopascal)
@@ -61,7 +84,7 @@ class Pressure private constructor(
             Unit.InchesOfMercury -> "inHg"
             Unit.MillimetersOfMercury -> "mmHg"
         }
-        return "${String.format("%.2f", value)} $suffix"
+        return "${String.format("%.1f", value)} $suffix"
     }
 
     enum class Unit {
@@ -77,5 +100,21 @@ class Pressure private constructor(
                 value = value,
                 unit = Unit.Hectopascal
             )
+
+        fun addFraction(pressure: Pressure, frac: Double): Pressure {
+            val pressureHectopascal = pressure.toHectopascal()
+            val newValueHectopascal = pressureHectopascal + (pressureHectopascal / frac)
+            val result = when(pressure.unit) {
+                Pressure.Unit.Hectopascal -> fromHectopascal(
+                    newValueHectopascal
+                ).convertTo(Pressure.Unit.Hectopascal)
+                Pressure.Unit.MillimetersOfMercury -> fromHectopascal(
+                    newValueHectopascal
+                ).convertTo(Pressure.Unit.MillimetersOfMercury)
+                Pressure.Unit.InchesOfMercury -> fromHectopascal(newValueHectopascal)
+                    .convertTo(Pressure.Unit.InchesOfMercury)
+            }
+            return result
+        }
     }
 }
