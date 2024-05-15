@@ -234,7 +234,7 @@ private fun DrawScope.drawWindAxis(
             WindSpeed.fromMetersPerSecond(value = range.value * frac)
                 .convertTo(max.unit)
 
-        val valueString = windSpeed.toValueString()
+        val valueString = windSpeed.toValueString(1)
         val labelString = measurer.measure(
             text = valueString,
             style = args.axisTextStyle

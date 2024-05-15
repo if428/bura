@@ -48,6 +48,8 @@ import com.davidtakac.bura.graphs.common.drawVerticalAxis
 import com.davidtakac.bura.pressure.Pressure
 import java.time.LocalDate
 import java.time.LocalTime
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 @Composable
@@ -58,10 +60,11 @@ fun PressureGraph(
     max: Pressure,
     modifier: Modifier = Modifier
 ) {
+    val numberOfYAxisTicks = 7.0
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
     val minYAxisValue = min
-    val maxYAxisValue = min + Pressure.addFraction(max - min, 7.0)
+    val maxYAxisValue = min + Pressure.addFraction(max - min, numberOfYAxisTicks)
     Log.i("PressureGraph", "min = $minYAxisValue, max = $maxYAxisValue")
     val plotColors = AppTheme.colors.pressureColors(minYAxisValue.toHectopascal(), maxYAxisValue.toHectopascal())
 
@@ -98,7 +101,7 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
 //    val iconSizeRound = iconSize.roundToInt()
 //    val hasSpaceFor12Icons =
 //        (size.width - args.startGutter - args.endGutter) - (iconSizeRound * 12) >= (12 * 2.dp.toPx())
-    val iconY = ((args.topGutter / 2) - (iconSize / 2)).roundToInt()
+  //  val iconY = ((args.topGutter / 2) - (iconSize / 2)).roundToInt()
     val range = (maxPressure - minPressure).value
 
     val plotPath = Path()
@@ -213,7 +216,7 @@ private fun DrawScope.drawPressureAxis(
             Pressure.fromHectopascal(value = range.value * frac)
                 .convertTo(max.unit)
 
-        val valueString = (min + pressure).toValueString()
+        val valueString = (min + pressure).toValueString(1)
         val labelString = measurer.measure(
             text = valueString,
             style = args.axisTextStyle

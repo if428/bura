@@ -64,9 +64,9 @@ class Pressure private constructor(
         }
     }
 
-    fun toValueString(): String {
+    fun toValueString(fractions: Int = 0): String {
         val result = this.toHectopascal()
-        return "${String.format("%.0f", result)}"
+        return "${String.format("%.${fractions}f", result)}"
     }
 
 

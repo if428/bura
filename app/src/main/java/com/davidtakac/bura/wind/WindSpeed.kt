@@ -75,9 +75,9 @@ class WindSpeed private constructor(
         return "${String.format("%.1f", value)} $suffix ($beaufort Bft)"
     }
 
-    fun toValueString(): String {
+    fun toValueString(fractions: Int = 0): String {
         val result = this.toMetersPerSecond()
-        return "${String.format("%.0f", result)}"
+        return "${String.format("%.${fractions}f", result)}"
     }
 
     fun toMetersPerSecond(): Double {
