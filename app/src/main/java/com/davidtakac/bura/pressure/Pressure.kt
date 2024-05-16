@@ -65,8 +65,7 @@ class Pressure private constructor(
     }
 
     fun toValueString(fractions: Int = 0): String {
-        val result = this.toHectopascal()
-        return "${String.format("%.${fractions}f", result)}"
+        return "${String.format("%.${fractions}f", this.value)}"
     }
 
 
@@ -101,20 +100,18 @@ class Pressure private constructor(
                 unit = Unit.Hectopascal
             )
 
-        fun addFraction(pressure: Pressure, frac: Double): Pressure {
-            val pressureHectopascal = pressure.toHectopascal()
-            val newValueHectopascal = pressureHectopascal + (pressureHectopascal / frac)
-            val result = when(pressure.unit) {
-                Pressure.Unit.Hectopascal -> fromHectopascal(
-                    newValueHectopascal
-                ).convertTo(Pressure.Unit.Hectopascal)
-                Pressure.Unit.MillimetersOfMercury -> fromHectopascal(
-                    newValueHectopascal
-                ).convertTo(Pressure.Unit.MillimetersOfMercury)
-                Pressure.Unit.InchesOfMercury -> fromHectopascal(newValueHectopascal)
-                    .convertTo(Pressure.Unit.InchesOfMercury)
+        fun toHectopascal(value: Double, unit: Unit): Double =
+            when (unit) {
+                Unit.Hectopascal -> value / 1.0
+                Unit.InchesOfMercury -> value / 0.02953
+                Unit.MillimetersOfMercury -> value / 0.750062
             }
-            return result
-        }
+
+        fun from(value: Double, unit: Unit): Pressure =
+            Pressure(
+                hectopascal = toHectopascal(value, unit),
+                value = value,
+                unit = unit,
+            )
     }
 }

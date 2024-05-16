@@ -48,9 +48,7 @@ import com.davidtakac.bura.graphs.common.drawVerticalAxis
 import com.davidtakac.bura.pressure.Pressure
 import java.time.LocalDate
 import java.time.LocalTime
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.roundToInt
+import com.davidtakac.bura.graphs.common.getYAxisTicks
 
 @Composable
 fun PressureGraph(
@@ -63,16 +61,27 @@ fun PressureGraph(
     val numberOfYAxisTicks = 7.0
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val minYAxisValue = min
-    val maxYAxisValue = min + Pressure.addFraction(max - min, numberOfYAxisTicks)
-    Log.i("PressureGraph", "min = $minYAxisValue, max = $maxYAxisValue")
+    val pressureYAxis = getYAxisTicks(
+        min = min.value,
+        max = max.value,
+        maxNumberOfTicks = 8,
+        headRoomBottomPercent = 5.0,
+        headRoomTopPercent = 15.0,
+        possibleTickSteps = arrayListOf(1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 50.0),
+        isMinimumAlwaysZero = false
+    )
+    Log.i("PressureGraph", "y axis: $pressureYAxis")
+
+    val minYAxisValue = Pressure.from(value = pressureYAxis.minYTick, unit = min.unit)
+    val maxYAxisValue = Pressure.from(value = pressureYAxis.maxYTick, unit = max.unit)
+    Log.i("PressureGraph", "minYAxisValue = $minYAxisValue, maxYAxisValue = $maxYAxisValue")
     val plotColors = AppTheme.colors.pressureColors(minYAxisValue.toHectopascal(), maxYAxisValue.toHectopascal())
 
     Canvas(modifier) {
         drawPressureAxis(
             min = minYAxisValue,
             max = maxYAxisValue,
-            context = context,
+            steps = pressureYAxis.numberOfSteps,
             measurer = measurer,
             args = args
         )
@@ -203,20 +212,20 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
 private fun DrawScope.drawPressureAxis(
     min: Pressure,
     max: Pressure,
-    context: Context,
+    steps: Int,
     measurer: TextMeasurer,
     args: GraphArgs
 ) {
     val range = max - min
     drawVerticalAxis(
-        steps = 7,
+        steps = steps,
         args = args
     ) { frac, endX, y ->
         val pressure =
-            Pressure.fromHectopascal(value = range.value * frac)
-                .convertTo(max.unit)
+            Pressure.from(value = range.value * frac, unit = min.unit)
+        Log.i("PressureGraph", "min: $min, pressure tick :$pressure")
 
-        val valueString = (min + pressure).toValueString(1)
+        val valueString = (min + pressure).toValueString()
         val labelString = measurer.measure(
             text = valueString,
             style = args.axisTextStyle

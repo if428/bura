@@ -51,6 +51,7 @@ import com.davidtakac.bura.graphs.common.drawLabeledPoint
 import com.davidtakac.bura.graphs.common.drawPastOverlayWithPoint
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
+import com.davidtakac.bura.graphs.common.getYAxisTicks
 import com.davidtakac.bura.wind.WindDirection
 import com.davidtakac.bura.wind.WindSpeed
 import java.time.LocalDate
@@ -66,13 +67,23 @@ fun WindGraph(
 ) {
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val maxYAxisValue = WindSpeed.addFraction(max, 7.0)
+    val windYAxis = getYAxisTicks(
+        min = 0.0,
+        max = max.value,
+        maxNumberOfTicks = 8,
+        headRoomBottomPercent = 5.0,
+        headRoomTopPercent = 15.0,
+        possibleTickSteps = arrayListOf(1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 50.0),
+        isMinimumAlwaysZero = true
+    )
+    val maxYAxisValue = WindSpeed.from(value = windYAxis.maxYTick, unit = max.unit)
+
     val plotColors = AppTheme.colors.windSpeedColors(0.0, maxYAxisValue.toMetersPerSecond())
 
     Canvas(modifier) {
         drawWindAxis(
             max = maxYAxisValue,
-            context = context,
+            steps = windYAxis.numberOfSteps,
             measurer = measurer,
             args = args
         )
@@ -221,20 +232,20 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
 
 private fun DrawScope.drawWindAxis(
     max: WindSpeed,
-    context: Context,
+    steps: Int,
     measurer: TextMeasurer,
     args: GraphArgs
 ) {
     val range = max
     drawVerticalAxis(
-        steps = 7,
+        steps = steps,
         args = args
     ) { frac, endX, y ->
         val windSpeed =
             WindSpeed.fromMetersPerSecond(value = range.value * frac)
                 .convertTo(max.unit)
 
-        val valueString = windSpeed.toValueString(1)
+        val valueString = windSpeed.toValueString()
         val labelString = measurer.measure(
             text = valueString,
             style = args.axisTextStyle

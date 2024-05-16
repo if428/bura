@@ -12,6 +12,7 @@
 
 package com.davidtakac.bura.wind
 
+import com.davidtakac.bura.pressure.Pressure
 import java.util.Objects
 
 class WindSpeed private constructor(
@@ -96,16 +97,19 @@ class WindSpeed private constructor(
             unit = Unit.MetersPerSecond
         )
 
-        fun addFraction(windSpeed: WindSpeed, frac: Double): WindSpeed {
-            val windSpeedMetersPerSecond = windSpeed.toMetersPerSecond()
-            val newValueMetersPerSecond = windSpeedMetersPerSecond + (windSpeedMetersPerSecond / frac)
-            val result = when(windSpeed.unit) {
-                WindSpeed.Unit.MetersPerSecond -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.MetersPerSecond)
-                WindSpeed.Unit.KilometersPerHour -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.KilometersPerHour)
-                WindSpeed.Unit.MilesPerHour -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.MilesPerHour)
-                WindSpeed.Unit.Knots -> fromMetersPerSecond(newValueMetersPerSecond).convertTo(WindSpeed.Unit.Knots)
+        fun toMetersPerSecond(value: Double, unit: Unit): Double =
+            when(unit) {
+                Unit.MetersPerSecond -> value
+                Unit.Knots -> value / 1.94384
+                Unit.MilesPerHour -> value / 2.2369
+                Unit.KilometersPerHour -> value / 4.6
             }
-            return result
-        }
+
+        fun from(value: Double, unit: Unit): WindSpeed =
+            WindSpeed(
+                metersPerSecond = toMetersPerSecond(value, unit),
+                value = value,
+                unit = unit,
+            )
     }
 }

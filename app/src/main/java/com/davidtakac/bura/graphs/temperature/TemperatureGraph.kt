@@ -13,6 +13,7 @@
 package com.davidtakac.bura.graphs.temperature
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import com.davidtakac.bura.graphs.common.drawLabeledPoint
 import com.davidtakac.bura.graphs.common.drawPastOverlayWithPoint
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
+import com.davidtakac.bura.graphs.common.getYAxisTicks
 import com.davidtakac.bura.temperature.Temperature
 import com.davidtakac.bura.temperature.string
 import java.time.LocalDate
@@ -67,24 +69,35 @@ fun TemperatureGraph(
     modifier: Modifier = Modifier
 ) {
     val paddingC = 3.0
+    val temperatureYAxis = getYAxisTicks(
+        min = absMinTemp.value,
+        max = absMaxTemp.value,
+        maxNumberOfTicks = 8,
+        headRoomBottomPercent = 5.0,
+        headRoomTopPercent = 15.0,
+        possibleTickSteps = arrayListOf(1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 50.0),
+        isMinimumAlwaysZero = false
+    )
+    Log.i("TemperatureGraph", "y axis: $temperatureYAxis")
     val maxCelsius = remember(absMaxTemp) { absMaxTemp.convertTo(Temperature.Unit.DegreesCelsius).value + paddingC }
     val minCelsius = remember(absMinTemp) { absMinTemp.convertTo(Temperature.Unit.DegreesCelsius).value - paddingC }
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val plotColors = AppTheme.colors.temperatureColors(minCelsius, maxCelsius)
+    val plotColors = AppTheme.colors.temperatureColors(fromCelsius = temperatureYAxis.minYTick, toCelsius = temperatureYAxis.maxYTick)
     Canvas(modifier) {
         drawTempAxis(
             unit = absMinTemp.unit,
-            minTempC = minCelsius,
-            maxTempC = maxCelsius,
+            minTempC = temperatureYAxis.minYTick,
+            maxTempC = temperatureYAxis.maxYTick,
+            steps = temperatureYAxis.numberOfSteps,
             context = context,
             measurer = measurer,
             args = args
         )
         drawHorizontalAxisAndPlot(
             state = state,
-            minCelsius = minCelsius,
-            maxCelsius = maxCelsius,
+            minCelsius = temperatureYAxis.minYTick,
+            maxCelsius = temperatureYAxis.maxYTick,
             context = context,
             measurer = measurer,
             plotColors = plotColors,
@@ -215,13 +228,14 @@ private fun DrawScope.drawTempAxis(
     unit: Temperature.Unit,
     maxTempC: Double,
     minTempC: Double,
+    steps: Int,
     context: Context,
     measurer: TextMeasurer,
     args: GraphArgs
 ) {
     val rangeC = maxTempC - minTempC
     drawVerticalAxis(
-        steps = 7,
+        steps = steps,
         args = args
     ) { frac, endX, y ->
         val temp = measurer.measure(

@@ -57,5 +57,18 @@ class Temperature private constructor(
             value = value,
             unit = Unit.DegreesCelsius
         )
+
+        fun toCelsius(value: Double, unit: Unit): Double =
+            when(unit) {
+                Unit.DegreesCelsius -> value / 1.0
+                Unit.DegreesFahrenheit -> (value - 32.0) / 1.8
+            }
+
+        fun from(value: Double, unit: Unit): Temperature =
+            Temperature(
+                degreesCelsius = toCelsius(value, unit),
+                value = value,
+                unit = unit,
+            )
     }
 }
