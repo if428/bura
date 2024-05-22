@@ -52,6 +52,8 @@ import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.image
 import com.davidtakac.bura.pop.Pop
 import com.davidtakac.bura.pop.string
+import com.davidtakac.bura.precipitation.Rain
+import com.davidtakac.bura.precipitation.string
 import com.davidtakac.bura.summary.PopAndDrop
 import com.davidtakac.bura.temperature.Temperature
 import com.davidtakac.bura.temperature.string
@@ -114,6 +116,7 @@ fun DaySummaryRow(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.weight(1f)
             ) {
+                val precipitationAmount = state.precipitation.value
                 DayAndPop(
                     day = {
                         Text(
@@ -130,10 +133,27 @@ fun DaySummaryRow(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Image(
-                    painter = state.desc.image(),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp)
+                ConditionAndPrecipitationAmount(
+                    weather = {
+                        Image(
+                            painter = state.desc.image(),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp)
+                        )
+                              },
+                    precipitationAmount = {
+                        Text(
+                            text = state.precipitation.string(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = when  {
+                                precipitationAmount <= 0.0 -> MaterialTheme.colorScheme.outlineVariant
+                                precipitationAmount < 1.0 -> MaterialTheme.colorScheme.primaryContainer
+                                precipitationAmount < 20.0 -> MaterialTheme.colorScheme.primary
+                                precipitationAmount < 50.0 -> MaterialTheme.colorScheme.tertiary
+                                else -> MaterialTheme.colorScheme.error
+                                          },
+                        )
+                    }
                 )
             }
             Row(
@@ -198,6 +218,22 @@ private fun DayAndPop(
 }
 
 @Composable
+private fun ConditionAndPrecipitationAmount(
+    weather: @Composable () -> Unit,
+    precipitationAmount: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End,
+        modifier = modifier
+    ) {
+        weather()
+        precipitationAmount()
+    }
+}
+
+@Composable
 private fun DayAndPopMaxHeightDummy(modifier: Modifier = Modifier) {
     DayAndPop(
         day = { Text("") },
@@ -244,6 +280,7 @@ private fun DaySummaryPreview() {
                     min = Temperature.fromDegreesCelsius(2.0),
                     max = Temperature.fromDegreesCelsius(19.0),
                     pop = null,
+                    precipitation = Rain.fromMillimeters(value = 0.0),
                     desc = Condition(wmoCode = 1, isDay = true)
                 ),
                 position = DaySummaryPosition.First,
@@ -259,6 +296,7 @@ private fun DaySummaryPreview() {
                     min = Temperature.fromDegreesCelsius(0.0),
                     max = Temperature.fromDegreesCelsius(5.0),
                     pop = Pop(15.0),
+                    precipitation = Rain.fromMillimeters(value = 2.0),
                     desc = Condition(wmoCode = 51, isDay = true)
                 ),
                 position = DaySummaryPosition.Middle,
@@ -274,6 +312,7 @@ private fun DaySummaryPreview() {
                     min = Temperature.fromDegreesCelsius(7.0),
                     max = Temperature.fromDegreesCelsius(15.0),
                     pop = Pop(0.0),
+                    precipitation = Rain.fromMillimeters(value = 24.7),
                     desc = Condition(wmoCode = 2, isDay = true)
                 ),
                 position = DaySummaryPosition.Last,

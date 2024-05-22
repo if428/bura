@@ -110,7 +110,7 @@ class AppContainer(private val appContext: Context) {
 
     val getNowSummary get() = GetNowSummary(tempRepo, feelsRepo, conditionRepo)
     val getHourlySummary get() = GetHourlySummary(tempRepo, popRepo, conditionRepo, sunRepo)
-    val getDailySummary get() = GetDailySummary(tempRepo, conditionRepo, popRepo)
+    val getDailySummary get() = GetDailySummary(tempRepo, conditionRepo, popRepo, precipRepo)
     val getPrecipitationSummary get() = GetPrecipitationSummary(precipRepo)
     val getUvIndexSummary get() = GetUvIndexSummary(uvIndexRepo)
     val getWindSummary get() = GetWindSummary(windRepo, gustRepo)

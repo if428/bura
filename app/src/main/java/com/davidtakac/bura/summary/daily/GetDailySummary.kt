@@ -21,6 +21,8 @@ import com.davidtakac.bura.units.Units
 import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionRepository
 import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.precipitation.Precipitation
+import com.davidtakac.bura.precipitation.PrecipitationRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -28,15 +30,18 @@ class GetDailySummary(
     private val tempRepo: TemperatureRepository,
     private val descRepo: ConditionRepository,
     private val popRepo: PopRepository,
+    private val precipitationRepo: PrecipitationRepository,
 ) {
     suspend operator fun invoke(coords: Coordinates, units: Units, now: LocalDateTime): ForecastResult<DailySummary> {
         val tempPeriod = tempRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val descPeriod = descRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val popPeriod = popRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
+        val precipitationPeriod = precipitationRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
 
         val futureTempDays = tempPeriod.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
         val popDays = popPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
         val descDays = descPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
+        val precipitationDays = precipitationPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
 
         val minOfAllDays = futureTempDays.minOf { it.minimum }
         val maxOfAllDays = futureTempDays.maxOf { it.maximum }
@@ -54,6 +59,7 @@ class GetDailySummary(
                             min = futureTempDays[i].minimum,
                             max = futureTempDays[i].maximum,
                             pop = popDays[i].maximum.takeIf { it.value > 0 },
+                            precipitation = precipitationDays[i].total,
                             desc = descDays[i].day ?: descDays[i].night!!
                         )
                     )
@@ -73,6 +79,7 @@ data class DaySummary(
     val isToday: Boolean,
     val time: LocalDate,
     val tempNow: Temperature?,
+    val precipitation: Precipitation,
     val min: Temperature,
     val max: Temperature,
     val pop: Pop?,
