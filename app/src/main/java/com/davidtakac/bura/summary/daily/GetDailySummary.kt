@@ -25,6 +25,7 @@ import com.davidtakac.bura.precipitation.Precipitation
 import com.davidtakac.bura.precipitation.PrecipitationRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime.MIDNIGHT
 
 class GetDailySummary(
     private val tempRepo: TemperatureRepository,
@@ -33,15 +34,16 @@ class GetDailySummary(
     private val precipitationRepo: PrecipitationRepository,
 ) {
     suspend operator fun invoke(coords: Coordinates, units: Units, now: LocalDateTime): ForecastResult<DailySummary> {
+        val startOfNowDay = now.with(MIDNIGHT)
         val tempPeriod = tempRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val descPeriod = descRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val popPeriod = popRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val precipitationPeriod = precipitationRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
 
-        val futureTempDays = tempPeriod.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
-        val popDays = popPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
-        val descDays = descPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
-        val precipitationDays = precipitationPeriod.momentsFrom(now)?.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
+        val futureTempDays = tempPeriod.daysFrom(startOfNowDay.toLocalDate()) ?: return ForecastResult.Outdated
+        val popDays = popPeriod.momentsFrom(startOfNowDay)?.daysFrom(startOfNowDay.toLocalDate()) ?: return ForecastResult.Outdated
+        val descDays = descPeriod.momentsFrom(startOfNowDay)?.daysFrom(startOfNowDay.toLocalDate()) ?: return ForecastResult.Outdated
+        val precipitationDays = precipitationPeriod.momentsFrom(startOfNowDay)?.daysFrom(startOfNowDay.toLocalDate()) ?: return ForecastResult.Outdated
 
         val minOfAllDays = futureTempDays.minOf { it.minimum }
         val maxOfAllDays = futureTempDays.maxOf { it.maximum }
