@@ -138,7 +138,6 @@ private fun Pager(
                 popGraph = state.popGraphs[page],
                 popArgs = GraphArgs.rememberPopArgs(),
                 precipGraph = state.precipGraphs.graphs[page],
-                precipMax = state.precipGraphs.max,
                 precipArgs = GraphArgs.rememberPrecipArgs(),
                 precipitationTotal = state.precipTotals[page],
                 windGraph = windGraphs.graphs[page],

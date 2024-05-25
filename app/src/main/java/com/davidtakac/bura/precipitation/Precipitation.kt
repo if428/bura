@@ -34,6 +34,15 @@ sealed class Precipitation(
 
     override fun compareTo(other: Precipitation): Int =
         millimeters.compareTo(other.millimeters)
+
+    companion object {
+        fun toMillimeters(value: Double, unit: Unit): Double =
+            value / when(unit) {
+                Unit.Millimeters -> 1.0
+                Unit.Centimeters -> 10.0
+                Unit.Inches -> 25.4
+            }
+    }
 }
 
 class Rain(millimeters: Double, value: Double, unit: Unit) :
@@ -187,6 +196,16 @@ class MixedPrecipitation(
                 unit = Unit.Millimeters
             )
         }
+
+        fun from(value: Double, unit: Unit): MixedPrecipitation =
+            MixedPrecipitation(
+                millimeters = toMillimeters(value, unit),
+                rain = Rain.fromMillimeters(0.0),
+                snow = Snow.fromMillimeters(0.0),
+                showers = Showers.fromMillimeters(0.0),
+                value = value,
+                unit = unit,
+            )
     }
 }
 

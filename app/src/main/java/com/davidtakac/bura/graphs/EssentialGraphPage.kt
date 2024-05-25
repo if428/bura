@@ -77,7 +77,6 @@ fun EssentialGraphPage(
     popArgs: GraphArgs,
     precipGraph: PrecipitationGraph,
     precipArgs: GraphArgs,
-    precipMax: MixedPrecipitation,
     precipitationTotal: PrecipitationTotal,
     maxWindGusts: WindSpeed,
     windArgs: GraphArgs,
@@ -150,7 +149,6 @@ fun EssentialGraphPage(
                 GraphScreenSectionLabel(stringResource(R.string.cond_screen_precip))
                 PrecipitationGraph(
                     state = precipGraph,
-                    max = precipMax,
                     args = precipArgs,
                     modifier = Modifier
                         .fillMaxWidth()

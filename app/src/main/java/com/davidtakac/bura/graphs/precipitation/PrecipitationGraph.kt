@@ -13,6 +13,7 @@
 package com.davidtakac.bura.graphs.precipitation
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -44,6 +45,7 @@ import com.davidtakac.bura.graphs.common.GraphTime
 import com.davidtakac.bura.graphs.common.drawPastOverlay
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
+import com.davidtakac.bura.graphs.common.getYAxisTicks
 import com.davidtakac.bura.precipitation.MixedPrecipitation
 import com.davidtakac.bura.precipitation.Precipitation
 import com.davidtakac.bura.precipitation.Rain
@@ -61,7 +63,6 @@ import kotlin.random.Random
 fun PrecipitationGraph(
     state: PrecipitationGraph,
     args: GraphArgs,
-    max: MixedPrecipitation,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -69,23 +70,41 @@ fun PrecipitationGraph(
     val rainColor = AppTheme.colors.rainColor
     val showersColor = AppTheme.colors.showersColor
     val snowColor = AppTheme.colors.snowColor
-    val maxAdjusted = remember(max) {
-        MixedPrecipitation.fromMillimeters(
-            rain = Rain.fromMillimeters((max.convertTo(Precipitation.Unit.Millimeters).value * 1.2f).coerceAtLeast(5.0)),
-            showers = Showers.Zero,
-            snow = Snow.Zero
-        ).convertTo(max.unit)
+    val oneMillimeterPrecipitation = MixedPrecipitation.fromMillimeters(rain = Rain.fromMillimeters(4.8), showers = Showers.fromMillimeters(0.0), snow = Snow.fromMillimeters(0.0))
+    val maxOfDay = state.points.maxOf { it -> when {
+        (it.precip < oneMillimeterPrecipitation) -> oneMillimeterPrecipitation
+            else -> it.precip
+        }
     }
+    Log.i("PrecipitationGraph", "max of day: $maxOfDay")
+    val precipitationYAxis = getYAxisTicks(
+        min = 0.0,
+        max = maxOfDay.value,
+        maxNumberOfTicks = 8,
+        headRoomBottomPercent = 0.0,
+        headRoomTopPercent = 1.0,
+        possibleTickSteps = arrayListOf(0.1, 0.2, 0.5, 1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1_000.0, 2_000.0, 5_000.0, 10_000.0),
+        isMinimumAlwaysZero = true
+    )
+    Log.i("PrecipitationGraph", "precipitation y axis: $precipitationYAxis")
+    val maxYAxisValue = MixedPrecipitation.from(
+        value = precipitationYAxis.maxYTick,
+        unit = maxOfDay.unit
+    )
+    Log.i("PrecipitationGraph", "max y axis value: $maxYAxisValue")
+
+
     Canvas(modifier) {
         drawPrecipAxis(
-            max = maxAdjusted,
+            max = maxYAxisValue,
             context = context,
             measurer = measurer,
+            steps = precipitationYAxis.numberOfSteps,
             args = args
         )
         drawHorizontalAxisAndBars(
             state = state,
-            max = maxAdjusted,
+            max = maxYAxisValue,
             context = context,
             measurer = measurer,
             rainColor = rainColor,
@@ -110,7 +129,7 @@ private fun DrawScope.drawHorizontalAxisAndBars(
     val iconSizeRound = iconSize.roundToInt()
     val hasSpaceFor12Icons = (size.width - args.startGutter - args.endGutter) - (iconSizeRound * 12) >= (12 * 2.dp.toPx())
     val iconY = ((args.topGutter / 2) - (iconSize / 2)).roundToInt()
-    val range = max.value * 1.2f
+    val range = max.value
 
     var nowX: Float? = null
     drawTimeAxis(
@@ -182,11 +201,12 @@ private fun DrawScope.drawPrecipAxis(
     max: MixedPrecipitation,
     context: Context,
     measurer: TextMeasurer,
+    steps: Int,
     args: GraphArgs
 ) {
     val range = max.convertTo(Precipitation.Unit.Millimeters).value
     drawVerticalAxis(
-        steps = 7,
+        steps = steps,
         args = args
     ) { frac, endX, y ->
         val rain = Rain.fromMillimeters(value = range * frac).convertTo(max.unit)
@@ -234,11 +254,6 @@ private fun PrecipitationGraphPreview() {
                 }
             ),
             args = GraphArgs.rememberPrecipArgs(),
-            max = MixedPrecipitation.fromMillimeters(
-                Rain.fromMillimeters(15.0),
-                Showers.Zero,
-                Snow.Zero
-            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f / 3f)
@@ -275,11 +290,6 @@ private fun PrecipitationGraphDarkPreview() {
                 }
             ),
             args = GraphArgs.rememberPrecipArgs(),
-            max = MixedPrecipitation.fromMillimeters(
-                Rain.fromMillimeters(15.0),
-                Showers.Zero,
-                Snow.Zero
-            ).convertTo(Precipitation.Unit.Inches),
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4f / 3f)
