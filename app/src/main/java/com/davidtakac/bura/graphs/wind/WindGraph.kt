@@ -14,6 +14,7 @@ package com.davidtakac.bura.graphs.wind
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -52,6 +53,7 @@ import com.davidtakac.bura.graphs.common.drawPastOverlayWithPoint
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
 import com.davidtakac.bura.graphs.common.getYAxisTicks
+import com.davidtakac.bura.wind.Wind
 import com.davidtakac.bura.wind.WindDirection
 import com.davidtakac.bura.wind.WindSpeed
 import java.time.LocalDate
@@ -67,16 +69,25 @@ fun WindGraph(
 ) {
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
+    val oneMeterPerSecondWind = WindSpeed.fromMetersPerSecond(1.0)
+    val maxOfDay = state.points.maxOf { it -> when {
+        (it.gusts.value < oneMeterPerSecondWind) -> oneMeterPerSecondWind
+        else -> it.gusts.value
+    }
+    }
+    Log.i("PrecipitationGraph", "max of day: $maxOfDay")
+    Log.i("WindGraph", "max of day: $maxOfDay")
+
     val windYAxis = getYAxisTicks(
         min = 0.0,
-        max = max.value,
+        max = maxOfDay.value,
         maxNumberOfTicks = 8,
         headRoomBottomPercent = 5.0,
         headRoomTopPercent = 15.0,
         possibleTickSteps = arrayListOf(1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 50.0),
         isMinimumAlwaysZero = true
     )
-    val maxYAxisValue = WindSpeed.from(value = windYAxis.maxYTick, unit = max.unit)
+    val maxYAxisValue = WindSpeed.from(value = windYAxis.maxYTick, unit = maxOfDay.unit)
 
     val plotColors = AppTheme.colors.windSpeedColors(0.0, maxYAxisValue.toMetersPerSecond())
 
