@@ -22,12 +22,16 @@ import com.davidtakac.bura.temperature.TemperaturePeriod
 import com.davidtakac.bura.uvindex.UvIndexPeriod
 import com.davidtakac.bura.visibility.VisibilityPeriod
 import com.davidtakac.bura.condition.ConditionPeriod
+import com.davidtakac.bura.temperature.DewpointPeriod
+import com.davidtakac.bura.temperature.FeelsLikePeriod
+import com.davidtakac.bura.temperature.WetbulbPeriod
 import com.davidtakac.bura.wind.WindPeriod
 
 data class Forecast(
     val temperature: TemperaturePeriod,
-    val feelsLike: TemperaturePeriod,
-    val dewPoint: TemperaturePeriod,
+    val feelsLike: FeelsLikePeriod,
+    val dewPoint: DewpointPeriod,
+    val wetbulb: WetbulbPeriod,
     val sun: SunPeriod?,
     val pop: PopPeriod,
     val precipitation: PrecipitationPeriod,
@@ -44,6 +48,7 @@ data class Forecast(
             temperature,
             feelsLike,
             dewPoint,
+            wetbulb,
             pop,
             precipitation,
             uvIndex,

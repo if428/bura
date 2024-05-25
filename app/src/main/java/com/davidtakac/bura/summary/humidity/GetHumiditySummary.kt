@@ -16,6 +16,7 @@ import com.davidtakac.bura.humidity.Humidity
 import com.davidtakac.bura.humidity.HumidityRepository
 import com.davidtakac.bura.forecast.ForecastResult
 import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.temperature.DewpointRepository
 import com.davidtakac.bura.temperature.Temperature
 import com.davidtakac.bura.temperature.TemperatureRepository
 import com.davidtakac.bura.units.Units
@@ -23,7 +24,7 @@ import java.time.LocalDateTime
 
 class GetHumiditySummary(
     private val humidityRepo: HumidityRepository,
-    private val dewPointRepo: TemperatureRepository,
+    private val dewPointRepo: DewpointRepository,
 ) {
     suspend operator fun invoke(coords: Coordinates, units: Units, now: LocalDateTime): ForecastResult<HumiditySummary> {
         val humidityPeriod = humidityRepo.period(coords, units) ?: return ForecastResult.FailedToDownload

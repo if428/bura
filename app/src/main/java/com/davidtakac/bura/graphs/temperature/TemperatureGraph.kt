@@ -13,6 +13,7 @@
 package com.davidtakac.bura.graphs.temperature
 
 import android.content.Context
+import android.graphics.DashPathEffect
 import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Canvas
@@ -29,10 +30,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalContext
@@ -121,17 +124,27 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
     val iconY = ((args.topGutter / 2) - (iconSize / 2)).roundToInt()
     val range = maxCelsius - minCelsius
 
-    val plotPath = Path()
-    val plotFillPath = Path()
-    fun movePlot(x: Float, y: Float) {
-        with(plotPath) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
-        with(plotFillPath) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
+    val plotPathTemperature = Path()
+    val plotFillPathTemperature = Path()
+    val plotPathDewpoint = Path()
+    val plotPathFeelsLike = Path()
+    fun movePlotTemperature(x: Float, y: Float) {
+        with(plotPathTemperature) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
+        with(plotFillPathTemperature) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
+    }
+
+    fun movePlotPathDewpoint(x: Float, y: Float) {
+        with(plotPathDewpoint) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
+    }
+
+    fun movePlotPathFeelsLike(x: Float, y: Float) {
+        with(plotPathFeelsLike) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
     }
 
     var minCenter: Pair<Offset, Temperature>? = null
     var maxCenter: Pair<Offset, Temperature>? = null
     var nowCenter: Offset? = null
-    var lastX = 0f
+    var lastXTemperature = 0f
 
     drawTimeAxis(
         measurer = measurer,
@@ -140,15 +153,25 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         // Temperature line
         val point = state.points.getOrNull(i) ?: return@drawTimeAxis
         val temp = point.temperature
+        val dewpoint = point.dewpoint
+        val wetbulb = point.wetbulbTemperature
+        val feelsLike = point.feelsLike
         val tempC = temp.value.convertTo(Temperature.Unit.DegreesCelsius).value
-        val y = ((1 - ((tempC - minCelsius) / range)) * (size.height - args.topGutter - args.bottomGutter)).toFloat() + args.topGutter
-        movePlot(x, y)
-        lastX = x
+        val dewpointC = dewpoint.value.convertTo(Temperature.Unit.DegreesCelsius).value
+        val wetbulbC = wetbulb.value.convertTo(Temperature.Unit.DegreesCelsius).value
+        val feelsLikeC = feelsLike.value.convertTo(Temperature.Unit.DegreesCelsius).value
+        val yTemperature = ((1 - ((tempC - minCelsius) / range)) * (size.height - args.topGutter - args.bottomGutter)).toFloat() + args.topGutter
+        val yDewpoint    = ((1 - ((dewpointC - minCelsius) / range)) * (size.height - args.topGutter - args.bottomGutter)).toFloat() + args.topGutter
+        val yFeelsLike   = ((1 - ((feelsLikeC - minCelsius) / range)) * (size.height - args.topGutter - args.bottomGutter)).toFloat() + args.topGutter
+        movePlotTemperature(x, yTemperature)
+        movePlotPathDewpoint(x, yDewpoint)
+        movePlotPathFeelsLike(x, yFeelsLike)
+        lastXTemperature = x
 
         // Min, max and now indicators are drawn after the plot so they're on top of it
-        if (temp.meta == GraphTemperature.Meta.Minimum) minCenter = Offset(x, y) to temp.value
-        if (temp.meta == GraphTemperature.Meta.Maximum) maxCenter = Offset(x, y) to temp.value
-        if (point.time.meta == GraphTime.Meta.Present) nowCenter = Offset(x, y)
+        if (temp.meta == GraphTemperature.Meta.Minimum) minCenter = Offset(x, yTemperature) to temp.value
+        if (temp.meta == GraphTemperature.Meta.Maximum) maxCenter = Offset(x, yTemperature) to temp.value
+        if (point.time.meta == GraphTime.Meta.Present) nowCenter = Offset(x, yTemperature)
 
         // Condition icons
         if (i % (if (hasSpaceFor12Icons) 2 else 3) == 1) {
@@ -162,9 +185,9 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         }
     }
     val plotBottom = size.height - args.bottomGutter
-    plotFillPath.lineTo(x = lastX, y = plotBottom)
-    plotFillPath.lineTo(x = args.startGutter, y = plotBottom)
-    plotFillPath.close()
+    plotFillPathTemperature.lineTo(x = lastXTemperature, y = plotBottom)
+    plotFillPathTemperature.lineTo(x = args.startGutter, y = plotBottom)
+    plotFillPathTemperature.close()
     val gradientStart = size.height - args.bottomGutter
     val gradientEnd = args.topGutter
     // Clip path makes sure the plot ends are within graph bounds
@@ -174,7 +197,7 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
                 Rect(
                     offset = Offset(x = args.startGutter, y = args.topGutter),
                     size = Size(
-                        width = lastX - args.startGutter,
+                        width = lastXTemperature - args.startGutter,
                         height = size.height - args.topGutter - args.bottomGutter
                     )
                 )
@@ -182,7 +205,7 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         }
     ) {
         drawPath(
-            plotPath,
+            plotPathTemperature,
             brush = Brush.verticalGradient(
                 colors = plotColors,
                 startY = gradientStart,
@@ -194,9 +217,27 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
                 cap = StrokeCap.Square
             )
         )
+        drawPath(
+            plotPathDewpoint,
+            brush = Brush.linearGradient(arrayListOf(Color.DarkGray, Color.DarkGray)),
+            style = Stroke(
+                width = args.plotWidth * 1 / 3,
+            )
+        )
+        drawPath(
+            plotPathFeelsLike,
+            brush = Brush.linearGradient(arrayListOf(Color.DarkGray, Color.DarkGray)),
+            style = Stroke(
+                width = args.plotWidth * 1 / 3,
+                pathEffect = PathEffect.dashPathEffect(
+                    intervals = floatArrayOf(8f, 10f),
+                    phase = 25f
+                )
+            )
+        )
     }
     drawPath(
-        plotFillPath,
+        plotFillPathTemperature,
         brush = Brush.verticalGradient(
             colors = plotColors.map { it.copy(alpha = args.plotFillAlpha) },
             startY = gradientStart,
@@ -333,6 +374,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-5.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-10.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 0, isDay = false),
 
             ),
@@ -343,6 +396,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-6.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-6.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-11.8),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 0, isDay = false),
@@ -357,6 +422,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-6.5),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-8.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-12.1),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 0, isDay = false),
 
             ),
@@ -367,6 +444,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-7.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-10.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-12.6),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 0, isDay = false),
@@ -381,6 +470,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-9.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-15.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-13.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 0, isDay = false),
 
             ),
@@ -391,6 +492,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-10.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-18.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-15.4),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 0, isDay = false),
@@ -405,6 +518,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-10.0),
                 meta = GraphTemperature.Meta.Minimum
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-19.1),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-15.7),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 0, isDay = false),
 
             ),
@@ -415,6 +540,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-8.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-12.2),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-11.4),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 0, isDay = false),
@@ -429,6 +566,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-5.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-8.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = true),
 
             ),
@@ -439,6 +588,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-3.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-3.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.4),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = true),
@@ -453,6 +614,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(0.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-0.2),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-2.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = true),
 
             ),
@@ -463,6 +636,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(10.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(4.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(6.4),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = true),
@@ -477,6 +662,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(21.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(5.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(18.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = true),
 
             ),
@@ -487,6 +684,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(31.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(8.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(29.5),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = true),
@@ -501,6 +710,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(51.0),
                 meta = GraphTemperature.Meta.Maximum
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(1.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(52.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = true),
 
             ),
@@ -511,6 +732,17 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(30.0),
+                meta = GraphTemperature.Meta.Regular
+            ),            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(8.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(29.5),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = true),
@@ -525,6 +757,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(21.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(11.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(19.9),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = true),
 
             ),
@@ -535,6 +779,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(10.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(8.5),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(9.6),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = false),
@@ -549,6 +805,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(0.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-0.1),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-1.2),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = false),
 
             ),
@@ -559,6 +827,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-10.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-10.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-11.2),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = false),
@@ -573,6 +853,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-20.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-20.1),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-22.7),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = false),
 
             ),
@@ -583,6 +875,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-27.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-34.7),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-38.0),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = false),
@@ -597,6 +901,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-38.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-38.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-44.2),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = false),
 
             ),
@@ -609,6 +925,18 @@ private val previewState = TemperatureGraph(
                 value = Temperature.fromDegreesCelsius(-7.0),
                 meta = GraphTemperature.Meta.Regular
             ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-23.1),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-18.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
             condition = Condition(wmoCode = 3, isDay = false),
 
             ),
@@ -619,6 +947,18 @@ private val previewState = TemperatureGraph(
             ),
             temperature = GraphTemperature(
                 value = Temperature.fromDegreesCelsius(-8.0),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            dewpoint = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-15.4),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            wetbulbTemperature = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-5.8),
+                meta = GraphTemperature.Meta.Regular
+            ),
+            feelsLike = GraphTemperature(
+                value = Temperature.fromDegreesCelsius(-15.3),
                 meta = GraphTemperature.Meta.Regular
             ),
             condition = Condition(wmoCode = 3, isDay = false),

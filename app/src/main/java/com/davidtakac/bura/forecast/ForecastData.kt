@@ -32,6 +32,7 @@ class ForecastData(
     val temperature: List<Temperature>,
     val feelsLikeTemperature: List<Temperature>,
     val dewPointTemperature: List<Temperature>,
+    val wetbulbTemperature: List<Temperature>,
     val sunrises: List<LocalDateTime>,
     val sunsets: List<LocalDateTime>,
     val pop: List<Pop>,

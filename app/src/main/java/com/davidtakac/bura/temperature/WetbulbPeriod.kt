@@ -12,12 +12,21 @@
 
 package com.davidtakac.bura.temperature
 
-import com.davidtakac.bura.forecast.HourMoment
+import com.davidtakac.bura.forecast.HourPeriod
+import java.time.LocalDate
 import java.time.LocalDateTime
 
-class TemperatureMoment(
-    hour: LocalDateTime,
-    val temperature: Temperature,
-) : HourMoment(hour) {
-    override fun toString(): String = "$hour: $temperature"
+class WetbulbPeriod(moments: List<WetbulbMoment>) : HourPeriod<WetbulbMoment>(moments) {
+    val minimum get() = minOf { it.temperature }
+
+    val maximum get() = maxOf { it.temperature }
+
+    override fun getDay(day: LocalDate) =
+        super.getDay(day)?.let { WetbulbPeriod(it) }
+
+    override fun momentsFrom(hourInclusive: LocalDateTime, takeMoments: Int?) =
+        super.momentsFrom(hourInclusive, takeMoments)?.let { WetbulbPeriod(it) }
+
+    override fun daysFrom(dayInclusive: LocalDate, takeDays: Int?) =
+        super.daysFrom(dayInclusive, takeDays)?.map { WetbulbPeriod(it) }
 }

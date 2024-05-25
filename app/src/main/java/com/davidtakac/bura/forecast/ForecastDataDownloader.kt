@@ -82,7 +82,6 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val times = hourly.getJSONArray("time").mapToList(LocalDateTime::parse)
             val indexOfLast23HourInstant = times.indexOfLast { it.toLocalTime() == LocalTime.parse("23:00") }
             val timesProcessed = times.slice(0..indexOfLast23HourInstant)
-
             val temperature = hourly.getJSONArray("temperature_2m").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
             val feelsLikeTemperature = hourly.getJSONArray("apparent_temperature").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
             val dewPointTemperature = hourly.getJSONArray("dew_point_2m").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
@@ -100,6 +99,10 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val visibility = hourly.getJSONArray("visibility").mapToList { Visibility.fromMeters(it.toDouble()) }
             val humidity = hourly.getJSONArray("relative_humidity_2m").mapToList { Humidity(it.toDouble()) }
             val pressure = hourly.getJSONArray("pressure_msl").mapToList { Pressure.fromHectopascal(it.toDouble()) }
+            val wetbulb = arrayListOf<Temperature>()
+            for (time in times) {
+                wetbulb.add(Temperature.fromDegreesCelsius(-100.0))
+            }
 
             ForecastData(
                 timestamp = Instant.now(),
@@ -121,6 +124,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
                 visibility = visibility,
                 humidity = humidity,
                 wmoCode = wmoCode,
+                wetbulbTemperature = wetbulb,
                 isDay = isDay
             )
         }

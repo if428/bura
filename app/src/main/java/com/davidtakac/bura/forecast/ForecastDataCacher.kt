@@ -71,12 +71,18 @@ class ForecastDataCacher(private val root: File) {
         withContext(Dispatchers.IO) {
             val jsonString = file.readText()
             val record = JSONObject(jsonString)
+            val times = record.getJSONArray("times").mapToList(LocalDateTime::parse)
+            val wetbulbTemperatures = arrayListOf<Temperature>()
+            for(time in times) {
+                wetbulbTemperatures.add(Temperature.fromDegreesCelsius(-20.0))
+            }
             ForecastData(
                 timestamp = Instant.ofEpochSecond(record.getLong("timestamp")),
-                times = record.getJSONArray("times").mapToList(LocalDateTime::parse),
+                times = times,
                 temperature = record.getJSONArray("temperature").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) },
                 feelsLikeTemperature = record.getJSONArray("feelsLike").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) },
                 dewPointTemperature = record.getJSONArray("dewPoint").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) },
+                wetbulbTemperature = wetbulbTemperatures,
                 sunrises = record.getJSONArray("sunrises").mapToList(LocalDateTime::parse),
                 sunsets = record.getJSONArray("sunsets").mapToList(LocalDateTime::parse),
                 pop = record.getJSONArray("pop").mapToList { Pop(it.toDouble()) },

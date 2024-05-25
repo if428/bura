@@ -19,11 +19,12 @@ import com.davidtakac.bura.units.Units
 import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionRepository
 import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.temperature.FeelsLikeRepository
 import java.time.LocalDateTime
 
 class GetNowSummary(
     private val tempRepo: TemperatureRepository,
-    private val feelsRepo: TemperatureRepository,
+    private val feelsRepo: FeelsLikeRepository,
     private val descRepo: ConditionRepository,
 ) {
     suspend operator fun invoke(coords: Coordinates, units: Units, now: LocalDateTime) : ForecastResult<NowSummary> {

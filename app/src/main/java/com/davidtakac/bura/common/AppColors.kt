@@ -44,8 +44,13 @@ data class AppColors(
         pressureHectopascal.roundToInt().coerceIn(920, 1080) - 920
     private fun getIndexOfNearestColorWindSpeed(windSpeedMs: Double): Int =
         windSpeedMs.roundToInt().coerceIn(0, 100)
-    private fun getIndexOfNearestColorTemperature(celsius: Double): Int =
-        40 + celsius.roundToInt().coerceIn(-40, 55)
+    private fun getIndexOfNearestColorTemperature(celsius: Double): Int {
+        val result = 40 + celsius.roundToInt().coerceIn(-40, 54)
+        if (result >= temperatureColors.size) {
+            throw Exception("requested color for temperature $celsius, which results in index $result")
+        }
+        return result
+    }
 
     companion object {
         val ForDarkTheme get() = AppColors(

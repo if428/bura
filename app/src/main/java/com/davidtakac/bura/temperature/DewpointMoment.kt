@@ -15,9 +15,9 @@ package com.davidtakac.bura.temperature
 import com.davidtakac.bura.forecast.HourMoment
 import java.time.LocalDateTime
 
-class TemperatureMoment(
+class DewpointMoment(
     hour: LocalDateTime,
     val temperature: Temperature,
 ) : HourMoment(hour) {
-    override fun toString(): String = "$hour: $temperature"
+    override fun toString(): String = "hour: $hour, dewpoint: $temperature"
 }

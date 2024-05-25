@@ -10,14 +10,15 @@
  * You should have received a copy of the GNU General Public License along with Bura. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.davidtakac.bura.temperature
+package com.davidtakac.bura.graphs.pressure
 
-import com.davidtakac.bura.forecast.HourMoment
-import java.time.LocalDateTime
+import com.davidtakac.bura.forecast.ForecastRepository
+import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.temperature.WetbulbPeriod
+import com.davidtakac.bura.temperature.WetbulbRepository
+import com.davidtakac.bura.units.Units
 
-class TemperatureMoment(
-    hour: LocalDateTime,
-    val temperature: Temperature,
-) : HourMoment(hour) {
-    override fun toString(): String = "$hour: $temperature"
+class EagerWetbulbRepository(private val repo: ForecastRepository) : WetbulbRepository {
+    override suspend fun period(coords: Coordinates, units: Units): WetbulbPeriod? =
+        repo.forecast(coords, units)?.wetbulb
 }

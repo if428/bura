@@ -25,6 +25,7 @@ import com.davidtakac.bura.forecast.ForecastRepository
 import com.davidtakac.bura.graphs.pop.GetPopGraphs
 import com.davidtakac.bura.graphs.precipitation.GetPrecipitationGraphs
 import com.davidtakac.bura.graphs.precipitation.GetPrecipitationTotals
+import com.davidtakac.bura.graphs.pressure.EagerWetbulbRepository
 import com.davidtakac.bura.graphs.pressure.GetPressureGraphs
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphSummaries
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphs
@@ -60,11 +61,14 @@ import com.davidtakac.bura.summary.visibility.GetVisibilitySummary
 import com.davidtakac.bura.summary.wind.GetWindSummary
 import com.davidtakac.bura.sun.EagerSunRepository
 import com.davidtakac.bura.sun.SunRepository
+import com.davidtakac.bura.temperature.DewpointRepository
 import com.davidtakac.bura.temperature.EagerDewPointRepository
 import com.davidtakac.bura.temperature.EagerFeelsLikeRepository
 import com.davidtakac.bura.temperature.EagerTemperatureRepository
+import com.davidtakac.bura.temperature.FeelsLikeRepository
 import com.davidtakac.bura.temperature.StaticTemperatureRepository
 import com.davidtakac.bura.temperature.TemperatureRepository
+import com.davidtakac.bura.temperature.WetbulbRepository
 import com.davidtakac.bura.units.PrefsSelectedUnitsRepository
 import com.davidtakac.bura.units.SelectedUnitsRepository
 import com.davidtakac.bura.uvindex.EagerUvIndexRepository
@@ -89,7 +93,7 @@ class AppContainer(private val appContext: Context) {
     }
 
     private val tempRepo: TemperatureRepository get() = EagerTemperatureRepository(forecastRepo)
-    private val feelsRepo: TemperatureRepository get() = EagerFeelsLikeRepository(forecastRepo)
+    private val feelsRepo: FeelsLikeRepository get() = EagerFeelsLikeRepository(forecastRepo)
     private val conditionRepo: ConditionRepository get() = EagerConditionRepository(forecastRepo)
     private val sunRepo: SunRepository get() = EagerSunRepository(forecastRepo)
     private val popRepo: PopRepository get() = EagerPopRepository(forecastRepo)
@@ -99,7 +103,8 @@ class AppContainer(private val appContext: Context) {
     private val gustRepo: GustRepository get() = EagerGustRepository(forecastRepo)
     private val pressureRepo: PressureRepository get() = EagerPressureRepository(forecastRepo)
     private val humidityRepo: HumidityRepository get() = EagerHumidityRepository(forecastRepo)
-    private val dewPointRepo: TemperatureRepository get() = EagerDewPointRepository(forecastRepo)
+    private val dewPointRepo: DewpointRepository get() = EagerDewPointRepository(forecastRepo)
+    private val wetbulbRepo: WetbulbRepository get() = EagerWetbulbRepository(forecastRepo)
     private val visibilityRepo: VisibilityRepository get() = EagerVisibilityRepository(forecastRepo)
 
     private val staticTempRepo: TemperatureRepository get() = StaticTemperatureRepository(forecastRepo)
@@ -120,7 +125,13 @@ class AppContainer(private val appContext: Context) {
     val getFeelsLikeSummary get() = GetFeelsLikeSummary(tempRepo, feelsRepo)
     val getVisibilitySummary get() = GetVisibilitySummary(visibilityRepo)
 
-    val getTemperatureGraphs get() = GetTemperatureGraphs(tempRepo, conditionRepo)
+    val getTemperatureGraphs get() = GetTemperatureGraphs(
+        tempRepo = tempRepo,
+        dewpointRepo = dewPointRepo,
+        wetbulbRepo = wetbulbRepo,
+        feelsLikeRepo = feelsRepo,
+        descRepo = conditionRepo
+    )
     val getWindGraphs get() = GetWindGraphs(windRepo, gustRepo)
     val getPressureGraphs  get() = GetPressureGraphs(pressureRepo)
     val getPopGraphs get() = GetPopGraphs(popRepo)

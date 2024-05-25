@@ -19,13 +19,14 @@ import com.davidtakac.bura.units.Units
 import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionRepository
 import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.temperature.FeelsLikeRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 class GetTemperatureGraphSummaries(
     private val tempRepo: TemperatureRepository,
     private val conditionRepo: ConditionRepository,
-    private val feelsLikeRepo: TemperatureRepository
+    private val feelsLikeRepo: FeelsLikeRepository
 ) {
     suspend operator fun invoke(
         coords: Coordinates,

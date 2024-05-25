@@ -16,7 +16,7 @@ import com.davidtakac.bura.forecast.ForecastRepository
 import com.davidtakac.bura.place.Coordinates
 import com.davidtakac.bura.units.Units
 
-class EagerFeelsLikeRepository(private val repo: ForecastRepository) : TemperatureRepository {
-    override suspend fun period(coords: Coordinates, units: Units): TemperaturePeriod? =
+class EagerFeelsLikeRepository(private val repo: ForecastRepository) : FeelsLikeRepository {
+    override suspend fun period(coords: Coordinates, units: Units): FeelsLikePeriod? =
         repo.forecast(coords, units)?.feelsLike
 }

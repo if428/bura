@@ -36,6 +36,12 @@ import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionMoment
 import com.davidtakac.bura.condition.ConditionPeriod
 import com.davidtakac.bura.precipitation.MixedPrecipitation
+import com.davidtakac.bura.temperature.DewpointMoment
+import com.davidtakac.bura.temperature.DewpointPeriod
+import com.davidtakac.bura.temperature.FeelsLikeMoment
+import com.davidtakac.bura.temperature.FeelsLikePeriod
+import com.davidtakac.bura.temperature.WetbulbMoment
+import com.davidtakac.bura.temperature.WetbulbPeriod
 import com.davidtakac.bura.wind.Wind
 import com.davidtakac.bura.wind.WindMoment
 import com.davidtakac.bura.wind.WindPeriod
@@ -46,8 +52,9 @@ class ForecastConverter {
     suspend fun fromData(data: ForecastData, toUnits: Units): Forecast =
         withContext(Dispatchers.Default) {
             val temperatureMoments = mutableListOf<TemperatureMoment>()
-            val feelsLikeMoments = mutableListOf<TemperatureMoment>()
-            val dewPointMoments = mutableListOf<TemperatureMoment>()
+            val feelsLikeMoments = mutableListOf<FeelsLikeMoment>()
+            val dewPointMoments = mutableListOf<DewpointMoment>()
+            val wetbulbMoments = mutableListOf<WetbulbMoment>()
             val popMoments = mutableListOf<PopMoment>()
             val precipMoments = mutableListOf<PrecipitationMoment>()
             val uvIndexMoments = mutableListOf<UvIndexMoment>()
@@ -61,8 +68,9 @@ class ForecastConverter {
             for (i in data.times.indices) {
                 val time = data.times[i]
                 temperatureMoments.add(TemperatureMoment(time, data.temperature[i].convertTo(toUnits.temperature)))
-                feelsLikeMoments.add(TemperatureMoment(time, data.feelsLikeTemperature[i].convertTo(toUnits.temperature)))
-                dewPointMoments.add(TemperatureMoment(time, data.dewPointTemperature[i].convertTo(toUnits.temperature)))
+                feelsLikeMoments.add(FeelsLikeMoment(time, data.feelsLikeTemperature[i].convertTo(toUnits.temperature)))
+                dewPointMoments.add(DewpointMoment(time, data.dewPointTemperature[i].convertTo(toUnits.temperature)))
+                wetbulbMoments.add(WetbulbMoment(time, data.wetbulbTemperature[i].convertTo(toUnits.temperature)))
                 popMoments.add(PopMoment(time, data.pop[i]))
                 val rain = data.rain[i].convertTo(toUnits.rain)
                 val showers = data.showers[i].convertTo(toUnits.showers)
@@ -78,8 +86,9 @@ class ForecastConverter {
             }
 
             val temperature = TemperaturePeriod(temperatureMoments)
-            val feelsLike = TemperaturePeriod(feelsLikeMoments)
-            val dewPoint = TemperaturePeriod(dewPointMoments)
+            val feelsLike = FeelsLikePeriod(feelsLikeMoments)
+            val dewPoint = DewpointPeriod(dewPointMoments)
+            val wetbulb = WetbulbPeriod(wetbulbMoments)
             val pop = PopPeriod(popMoments)
             val precipitation = PrecipitationPeriod(precipMoments)
             val uvIndex = UvIndexPeriod(uvIndexMoments)
@@ -101,6 +110,7 @@ class ForecastConverter {
                 temperature = temperature,
                 feelsLike = feelsLike,
                 dewPoint = dewPoint,
+                wetbulb = wetbulb,
                 sun = sun,
                 pop = pop,
                 precipitation = precipitation,

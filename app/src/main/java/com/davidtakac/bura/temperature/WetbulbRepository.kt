@@ -12,12 +12,10 @@
 
 package com.davidtakac.bura.temperature
 
-import com.davidtakac.bura.forecast.HourMoment
-import java.time.LocalDateTime
+import com.davidtakac.bura.place.Coordinates
+import com.davidtakac.bura.temperature.WetbulbPeriod
+import com.davidtakac.bura.units.Units
 
-class TemperatureMoment(
-    hour: LocalDateTime,
-    val temperature: Temperature,
-) : HourMoment(hour) {
-    override fun toString(): String = "$hour: $temperature"
+interface WetbulbRepository {
+    suspend fun period(coords: Coordinates, units: Units): WetbulbPeriod?
 }
