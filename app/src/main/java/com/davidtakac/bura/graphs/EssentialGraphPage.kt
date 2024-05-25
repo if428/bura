@@ -12,7 +12,6 @@
 
 package com.davidtakac.bura.graphs
 
-import android.graphics.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +24,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,19 +42,15 @@ import com.davidtakac.bura.graphs.common.GraphScreenSectionLabel
 import com.davidtakac.bura.graphs.pop.PopGraph
 import com.davidtakac.bura.graphs.precipitation.PrecipitationBullets
 import com.davidtakac.bura.graphs.precipitation.PrecipitationGraph
-import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
+import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.pressure.PressureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.wind.WindGraph
-import com.davidtakac.bura.precipitation.MixedPrecipitation
 import com.davidtakac.bura.pressure.Pressure
 import com.davidtakac.bura.summary.now.NowSummarySkeleton
 import com.davidtakac.bura.temperature.Temperature
-import com.davidtakac.bura.wind.WindSpeed
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
-import kotlin.io.path.Path
 
 private const val graphAspectRatio = 4f / 3f
 private val contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
@@ -78,7 +69,6 @@ fun EssentialGraphPage(
     precipGraph: PrecipitationGraph,
     precipArgs: GraphArgs,
     precipitationTotal: PrecipitationTotal,
-    maxWindGusts: WindSpeed,
     windArgs: GraphArgs,
     windGraph: WindGraph,
     minPressure: Pressure,
@@ -180,7 +170,6 @@ fun EssentialGraphPage(
                 GraphScreenSectionLabel(text = stringResource(id = R.string.windCaption))
                 WindGraph(
                     state = windGraph,
-                    max = maxWindGusts,
                     args = windArgs,
                     modifier = Modifier
                         .fillMaxWidth()

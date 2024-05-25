@@ -141,7 +141,6 @@ private fun Pager(
                 precipArgs = GraphArgs.rememberPrecipArgs(),
                 precipitationTotal = state.precipTotals[page],
                 windGraph = windGraphs.graphs[page],
-                maxWindGusts = windGraphs.max,
                 windArgs = GraphArgs.rememberWindArgs(),
                 minPressure = pressureGraphs.min,
                 maxPressure = pressureGraphs.max,

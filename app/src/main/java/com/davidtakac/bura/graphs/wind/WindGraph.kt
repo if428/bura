@@ -53,7 +53,6 @@ import com.davidtakac.bura.graphs.common.drawPastOverlayWithPoint
 import com.davidtakac.bura.graphs.common.drawTimeAxis
 import com.davidtakac.bura.graphs.common.drawVerticalAxis
 import com.davidtakac.bura.graphs.common.getYAxisTicks
-import com.davidtakac.bura.wind.Wind
 import com.davidtakac.bura.wind.WindDirection
 import com.davidtakac.bura.wind.WindSpeed
 import java.time.LocalDate
@@ -64,14 +63,13 @@ import kotlin.math.roundToInt
 fun WindGraph(
     state: WindGraph,
     args: GraphArgs,
-    max: WindSpeed,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val measurer = rememberTextMeasurer()
-    val oneMeterPerSecondWind = WindSpeed.fromMetersPerSecond(1.0)
+    val minimumWindYAxisMax = WindSpeed.fromMetersPerSecond(7.0).convertTo(state.points[0].gusts.value.unit)
     val maxOfDay = state.points.maxOf { it -> when {
-        (it.gusts.value < oneMeterPerSecondWind) -> oneMeterPerSecondWind
+        (it.gusts.value < minimumWindYAxisMax) -> minimumWindYAxisMax
         else -> it.gusts.value
     }
     }
@@ -278,7 +276,6 @@ private fun WindGraphNowMiddlePreview() {
     AppTheme {
         WindGraph(
             state = previewState,
-            max = WindSpeed.fromMetersPerSecond(40.0),
             args = GraphArgs.rememberWindArgs(),
             modifier = Modifier
                 .width(400.dp)
@@ -301,7 +298,6 @@ private fun WindGraphNowStartPreview() {
                     )
                 )
             }),
-            max = WindSpeed.fromMetersPerSecond(40.0),
             args = GraphArgs.rememberWindArgs(),
             modifier = Modifier
                 .width(400.dp)
@@ -324,7 +320,6 @@ private fun WindGraphNowEndPreview() {
                     )
                 )
             }),
-            max = WindSpeed.fromMetersPerSecond(40.0),
             args = GraphArgs.rememberWindArgs(),
             modifier = Modifier
                 .width(400.dp)
