@@ -190,6 +190,15 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
     plotFillPathTemperature.close()
     val gradientStart = size.height - args.bottomGutter
     val gradientEnd = args.topGutter
+
+    drawPath(
+        plotFillPathTemperature,
+        brush = Brush.verticalGradient(
+            colors = plotColors.map { it.copy(alpha = args.plotFillAlpha) },
+            startY = gradientStart,
+            endY = gradientEnd
+        )
+    )
     // Clip path makes sure the plot ends are within graph bounds
     clipPath(
         path = Path().apply {
@@ -236,14 +245,6 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
             )
         )
     }
-    drawPath(
-        plotFillPathTemperature,
-        brush = Brush.verticalGradient(
-            colors = plotColors.map { it.copy(alpha = args.plotFillAlpha) },
-            startY = gradientStart,
-            endY = gradientEnd
-        )
-    )
     minCenter?.let { (offset, temp) ->
         drawLabeledPoint(
             label = temp.string(context, args.numberFormat),
