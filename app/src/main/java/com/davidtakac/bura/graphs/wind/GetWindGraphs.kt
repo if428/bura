@@ -51,7 +51,7 @@ class GetWindGraphs(
                                             now = now
                                         ),
                                         windSpeed = moment.wind.speed,
-                                        direction = moment.wind.direction,
+                                        direction = moment.wind.from,
                                         gusts = GraphWindGust(value = moment.wind.gusts, meta = if(moment.wind.gusts == day.maxOf { it.wind.gusts }) GraphWindGust.Meta.Maximum else GraphWindGust.Meta.Regular)
                                     )
                                 }
