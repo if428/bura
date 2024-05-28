@@ -228,14 +228,14 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         )
         drawPath(
             plotPathDewpoint,
-            brush = Brush.linearGradient(arrayListOf(Color.DarkGray, Color.DarkGray)),
+            brush = Brush.linearGradient(arrayListOf(args.axisColor, args.axisColor)),
             style = Stroke(
                 width = args.plotWidth * 1 / 3,
             )
         )
         drawPath(
             plotPathFeelsLike,
-            brush = Brush.linearGradient(arrayListOf(Color.DarkGray, Color.DarkGray)),
+            brush = Brush.linearGradient(arrayListOf(args.axisColor, args.axisColor)),
             style = Stroke(
                 width = args.plotWidth * 1 / 3,
                 pathEffect = PathEffect.dashPathEffect(
