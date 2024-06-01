@@ -92,6 +92,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val showers = hourly.getJSONArray("showers").mapToList { Showers.fromMillimeters(it.toDouble()) }
             // Open-Meteo returns snow in centimeters
             val snowfall = hourly.getJSONArray("snowfall").mapToList { Snow.fromMillimeters(value = it.toDouble() * 10) }
+            val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration").mapToList { it.toDouble() / 60.0 }
             val uvIndex = hourly.getJSONArray("uv_index").mapToList { UvIndex(it.toDouble().toInt()) }
             val windSpeed = hourly.getJSONArray("wind_speed_10m").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
             val windDirection = hourly.getJSONArray("wind_direction_10m").mapToList { WindDirection(it.toDouble()) }
@@ -110,6 +111,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
                 temperature = temperature,
                 feelsLikeTemperature = feelsLikeTemperature,
                 dewPointTemperature = dewPointTemperature,
+                sunshineDurationMinutes = sunshineDurationMinutes,
                 sunrises = sunrises,
                 sunsets = sunsets,
                 pop = pop,
@@ -129,16 +131,41 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             )
         }
 
-    private fun openMeteoUrl(coords: Coordinates): String =
-        "https://api.open-meteo.com/v1/forecast" +
+    private fun openMeteoUrl(coords: Coordinates): String {
+        val hourlyVariables = arrayListOf(
+            "temperature_2m",
+            "relative_humidity_2m",
+            "dew_point_2m",
+            "apparent_temperature",
+            "sunshine_duration",
+            "precipitation_probability",
+            "rain",
+            "showers",
+            "snowfall",
+            "weather_code",
+            "pressure_msl",
+            "visibility",
+            "wind_speed_10m",
+            "wind_direction_10m",
+            "wind_gusts_10m",
+            "uv_index",
+            "is_day",
+        ).joinToString(",")
+
+        val dailyVariables = arrayListOf(
+            "sunrise",
+            "sunset",
+        ).joinToString(",")
+        return "https://api.open-meteo.com/v1/forecast" +
                 "?latitude=${formatCoordinate(coords.latitude)}" +
                 "&longitude=${formatCoordinate(coords.longitude)}" +
-                "&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,apparent_temperature,precipitation_probability,rain,showers,snowfall,weather_code,pressure_msl,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index,is_day" +
-                "&daily=sunrise,sunset" +
+                "&hourly=$hourlyVariables" +
+                "&daily=$dailyVariables" +
                 "&wind_speed_unit=ms" +
                 // timezone=auto returns whole days for the desired location
                 "&timezone=auto" +
                 "&past_days=1"
+    }
 
     private fun formatCoordinate(value: Double): String = String.format(Locale.ROOT, "%.2f", value)
 }

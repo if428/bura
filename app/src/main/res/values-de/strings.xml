@@ -220,4 +220,5 @@
     <string name="wmo_99">Gewitter mit schwerem Hagel</string>
     <string name="windCaption">Wind</string>
     <string name="pressure_caption">Luftdruck</string>
+    <string name="hourly_sunshine_duration_caption">Sonnenscheindauer</string>
 </resources>

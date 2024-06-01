@@ -97,7 +97,8 @@ class ForecastDataCacher(private val root: File) {
                 visibility = record.getJSONArray("visibility").mapToList { Visibility.fromMeters(it.toDouble()) },
                 humidity = record.getJSONArray("humidity").mapToList { Humidity(it.toDouble()) },
                 wmoCode = record.getJSONArray("wmoCode").mapToList(String::toInt),
-                isDay = record.getJSONArray("isDay").mapToList(String::toBoolean)
+                isDay = record.getJSONArray("isDay").mapToList(String::toBoolean),
+                sunshineDurationMinutes = record.getJSONArray("sunshineDurationMinutes").mapToList { it.toDouble() }
             )
         }
 
@@ -124,6 +125,7 @@ class ForecastDataCacher(private val root: File) {
                 put("humidity", data.humidity.mapToJSONArray { it.value })
                 put("wmoCode", data.wmoCode.mapToJSONArray())
                 put("isDay", data.isDay.mapToJSONArray())
+                put("sunshineDurationMinutes", data.sunshineDurationMinutes.mapToJSONArray { it })
             }.toString()
         }
 

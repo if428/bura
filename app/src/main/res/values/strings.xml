@@ -220,4 +220,5 @@
     <string name="wmo_99">Thunderstorm with heavy hail</string>
     <string name="windCaption">Wind</string>
     <string name="pressure_caption">Air Pressure</string>
+    <string name="hourly_sunshine_duration_caption">Sunshine Duration</string>
 </resources>

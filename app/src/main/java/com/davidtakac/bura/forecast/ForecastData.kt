@@ -48,4 +48,5 @@ class ForecastData(
     val humidity: List<Humidity>,
     val wmoCode: List<Int>,
     val isDay: List<Boolean>,
+    val sunshineDurationMinutes: List<Double>,
 )

@@ -36,6 +36,8 @@ import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionMoment
 import com.davidtakac.bura.condition.ConditionPeriod
 import com.davidtakac.bura.precipitation.MixedPrecipitation
+import com.davidtakac.bura.sun.HourlySunshineDurationMoment
+import com.davidtakac.bura.sun.SunshineDurationPeriod
 import com.davidtakac.bura.temperature.DewpointMoment
 import com.davidtakac.bura.temperature.DewpointPeriod
 import com.davidtakac.bura.temperature.FeelsLikeMoment
@@ -64,6 +66,7 @@ class ForecastConverter {
             val visibilityMoments = mutableListOf<VisibilityMoment>()
             val humidityMoments = mutableListOf<HumidityMoment>()
             val conditionMoments = mutableListOf<ConditionMoment>()
+            val sunshineDurationMoments = mutableListOf<HourlySunshineDurationMoment>()
 
             for (i in data.times.indices) {
                 val time = data.times[i]
@@ -83,6 +86,7 @@ class ForecastConverter {
                 visibilityMoments.add(VisibilityMoment(time, data.visibility[i].convertTo(toUnits.visibility)))
                 humidityMoments.add(HumidityMoment(time, data.humidity[i]))
                 conditionMoments.add(ConditionMoment(time, Condition(data.wmoCode[i], data.isDay[i])))
+                sunshineDurationMoments.add(HourlySunshineDurationMoment(time, data.sunshineDurationMinutes[i]))
             }
 
             val temperature = TemperaturePeriod(temperatureMoments)
@@ -97,6 +101,7 @@ class ForecastConverter {
             val pressure = PressurePeriod(pressureMoments)
             val visibility = VisibilityPeriod(visibilityMoments)
             val humidity = HumidityPeriod(humidityMoments)
+            val sunshineDuration = SunshineDurationPeriod(sunshineDurationMoments)
             val weatherDescription = ConditionPeriod(conditionMoments)
 
             val sunriseMoments = data.sunrises.map { SunMoment(it, SunEvent.Sunrise) }
@@ -120,6 +125,7 @@ class ForecastConverter {
                 pressure = pressure,
                 visibility = visibility,
                 humidity = humidity,
+                sunshineDuration = sunshineDuration,
                 weatherDescription = weatherDescription
             )
         }

@@ -45,6 +45,7 @@ import com.davidtakac.bura.graphs.precipitation.PrecipitationGraph
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
 import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.pressure.PressureGraph
+import com.davidtakac.bura.graphs.sun.SunshineDurationGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.wind.WindGraph
@@ -74,7 +75,9 @@ fun EssentialGraphPage(
     minPressure: Pressure,
     maxPressure: Pressure,
     pressureArgs: GraphArgs,
-    pressureGraph: PressureGraph
+    pressureGraph: PressureGraph,
+    sunshineDurationGraph: SunshineDurationGraph,
+    sunshineDurationArgs: GraphArgs,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
@@ -191,6 +194,24 @@ fun EssentialGraphPage(
                     min = minPressure,
                     max = maxPressure,
                     args = pressureArgs,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(graphAspectRatio)
+                        .border(
+                            width = Dp.Hairline,
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        .clip(MaterialTheme.shapes.large)
+                )
+            }
+        }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(graphLabelSpacing)) {
+                GraphScreenSectionLabel(text = stringResource(id = R.string.hourly_sunshine_duration_caption))
+                SunshineDurationGraph(
+                    state = sunshineDurationGraph,
+                    args = sunshineDurationArgs,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(graphAspectRatio)
