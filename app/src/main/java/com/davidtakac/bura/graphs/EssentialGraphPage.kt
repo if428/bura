@@ -45,7 +45,7 @@ import com.davidtakac.bura.graphs.precipitation.PrecipitationGraph
 import com.davidtakac.bura.graphs.precipitation.PrecipitationTotal
 import com.davidtakac.bura.graphs.precipitation.TodayPrecipitationBullets
 import com.davidtakac.bura.graphs.pressure.PressureGraph
-import com.davidtakac.bura.graphs.sun.SunshineDurationGraph
+import com.davidtakac.bura.graphs.sun.DirectRadiationGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraph
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.wind.WindGraph
@@ -76,8 +76,9 @@ fun EssentialGraphPage(
     maxPressure: Pressure,
     pressureArgs: GraphArgs,
     pressureGraph: PressureGraph,
-    sunshineDurationGraph: SunshineDurationGraph,
-    sunshineDurationArgs: GraphArgs,
+    directRadiationGraph: DirectRadiationGraph,
+    directRadiationArgs: GraphArgs,
+    maxDirectRadiation: Double,
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(verticalSpacing),
@@ -208,10 +209,10 @@ fun EssentialGraphPage(
         }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(graphLabelSpacing)) {
-                GraphScreenSectionLabel(text = stringResource(id = R.string.hourly_sunshine_duration_caption))
-                SunshineDurationGraph(
-                    state = sunshineDurationGraph,
-                    args = sunshineDurationArgs,
+                GraphScreenSectionLabel(text = stringResource(id = R.string.direct_radiation_caption))
+                DirectRadiationGraph(
+                    state = directRadiationGraph,
+                    args = directRadiationArgs,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(graphAspectRatio)

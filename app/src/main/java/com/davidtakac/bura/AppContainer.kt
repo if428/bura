@@ -27,7 +27,7 @@ import com.davidtakac.bura.graphs.precipitation.GetPrecipitationGraphs
 import com.davidtakac.bura.graphs.precipitation.GetPrecipitationTotals
 import com.davidtakac.bura.graphs.pressure.EagerWetbulbRepository
 import com.davidtakac.bura.graphs.pressure.GetPressureGraphs
-import com.davidtakac.bura.graphs.sun.GetSunshineDurationGraphs
+import com.davidtakac.bura.graphs.sun.GetDirectRadiationGraphs
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphSummaries
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphs
 import com.davidtakac.bura.graphs.wind.GetWindGraphs
@@ -60,6 +60,8 @@ import com.davidtakac.bura.summary.sun.GetSunSummary
 import com.davidtakac.bura.summary.uvindex.GetUvIndexSummary
 import com.davidtakac.bura.summary.visibility.GetVisibilitySummary
 import com.davidtakac.bura.summary.wind.GetWindSummary
+import com.davidtakac.bura.sun.DirectRadiationRepository
+import com.davidtakac.bura.sun.EagerDirectRadiationRepository
 import com.davidtakac.bura.sun.EagerSunRepository
 import com.davidtakac.bura.sun.EagerSunshineDurationRepository
 import com.davidtakac.bura.sun.HourlySunshineDurationRepository
@@ -109,7 +111,7 @@ class AppContainer(private val appContext: Context) {
     private val dewPointRepo: DewpointRepository get() = EagerDewPointRepository(forecastRepo)
     private val wetbulbRepo: WetbulbRepository get() = EagerWetbulbRepository(forecastRepo)
     private val visibilityRepo: VisibilityRepository get() = EagerVisibilityRepository(forecastRepo)
-    private val hourlySunshineDurationRepo: HourlySunshineDurationRepository get() = EagerSunshineDurationRepository(forecastRepo)
+    private val directRadiationRepo: DirectRadiationRepository get() = EagerDirectRadiationRepository(forecastRepo)
 
     private val staticTempRepo: TemperatureRepository get() = StaticTemperatureRepository(forecastRepo)
     private val staticConditionRepo: ConditionRepository get() = StaticConditionRepository(forecastRepo)
@@ -143,7 +145,7 @@ class AppContainer(private val appContext: Context) {
     val getTemperatureGraphSummaries get() = GetTemperatureGraphSummaries(tempRepo, conditionRepo, feelsRepo)
     val getPrecipitationGraphs get() = GetPrecipitationGraphs(precipRepo, conditionRepo)
 
-    val getSunshineDurationGraphs get() = GetSunshineDurationGraphs(hourlySunshineDurationRepo, conditionRepo)
+    val getDirectRadiationGraphs get() = GetDirectRadiationGraphs(directRadiationRepository = directRadiationRepo, conditionRepository = conditionRepo)
 
     private val savedPlacesRepo: SavedPlacesRepository by lazy { FileSavedPlacesRepository(root) }
     val getSavedPlaces get() = GetSavedPlaces(savedPlacesRepo, staticTempRepo, staticConditionRepo)

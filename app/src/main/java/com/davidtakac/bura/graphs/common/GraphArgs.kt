@@ -167,7 +167,7 @@ data class GraphArgs(
         }
 
         @Composable
-        fun rememberHourlySunshineDurationArgs(): GraphArgs {
+        fun rememberDirectRadiationArgs(): GraphArgs {
             val density = LocalDensity.current
             val colorScheme = MaterialTheme.colorScheme
             val typography = MaterialTheme.typography

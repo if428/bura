@@ -215,5 +215,5 @@
     <string name="wmo_95">Burza</string>
     <string name="wmo_96">Burza z wyładowaniami</string>
     <string name="wmo_99">Burza z piorunami</string>
-    <string name="hourly_sunshine_duration_caption">Sunshine Duration</string>
+    <string name="direct_radiation_caption">Direct Radiation (W/m^2)</string>
 </resources>

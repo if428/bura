@@ -39,6 +39,7 @@ class ForecastData(
     val rain: List<Rain>,
     val showers: List<Showers>,
     val snow: List<Snow>,
+    val directionRadiation: List<Double>,
     val uvIndex: List<UvIndex>,
     val windSpeed: List<WindSpeed>,
     val windDirection: List<WindDirection>,

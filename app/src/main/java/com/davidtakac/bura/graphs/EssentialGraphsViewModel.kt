@@ -26,8 +26,8 @@ import com.davidtakac.bura.graphs.precipitation.GetPrecipitationTotals
 import com.davidtakac.bura.graphs.precipitation.PrecipitationGraphs
 import com.davidtakac.bura.graphs.pressure.GetPressureGraphs
 import com.davidtakac.bura.graphs.pressure.PressureGraphs
-import com.davidtakac.bura.graphs.sun.GetSunshineDurationGraphs
-import com.davidtakac.bura.graphs.sun.SunshineDurationGraphs
+import com.davidtakac.bura.graphs.sun.DirectRadiationGraphs
+import com.davidtakac.bura.graphs.sun.GetDirectRadiationGraphs
 import com.davidtakac.bura.graphs.temperature.GetTemperatureGraphSummaries
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphSummary
 import com.davidtakac.bura.graphs.temperature.TemperatureGraphs
@@ -50,7 +50,7 @@ class EssentialGraphsViewModel(
     private val getPrecipGraphs: GetPrecipitationGraphs,
     private val getPrecipTotals: GetPrecipitationTotals,
     private val getWindGraphs: GetWindGraphs,
-    private val getSunshineDurationGraphs: GetSunshineDurationGraphs,
+    private val getDirectRadiationGraphs: GetDirectRadiationGraphs,
     private val getPressureGraphs: GetPressureGraphs
 ) : ViewModel() {
     private val _state = MutableStateFlow<EssentialGraphsState>(EssentialGraphsState.Loading)
@@ -120,8 +120,8 @@ class EssentialGraphsViewModel(
             is ForecastResult.Success -> Unit
         }
 
-        val sunshineDurationGraphs = getSunshineDurationGraphs(coords, units, now)
-        when (sunshineDurationGraphs) {
+        val directRadiationGraphs = getDirectRadiationGraphs(coords, units, now)
+        when (directRadiationGraphs) {
             ForecastResult.FailedToDownload -> return EssentialGraphsState.FailedToDownload
             ForecastResult.Outdated -> return EssentialGraphsState.Outdated
             is ForecastResult.Success -> Unit
@@ -134,7 +134,7 @@ class EssentialGraphsViewModel(
             precipGraphs = precipGraphs.data,
             precipTotals = precipTotals.data,
             windGraphs = windGraphs.data,
-            sunshineDurationGraphs = sunshineDurationGraphs.data,
+            directRadiationGraphs = directRadiationGraphs.data,
             pressureGraphs = pressureGraphs.data
         )
     }
@@ -153,7 +153,7 @@ class EssentialGraphsViewModel(
                     getPrecipGraphs = container.getPrecipitationGraphs,
                     getPrecipTotals = container.getPrecipitationTotals,
                     getWindGraphs = container.getWindGraphs,
-                    getSunshineDurationGraphs = container.getSunshineDurationGraphs,
+                    getDirectRadiationGraphs = container.getDirectRadiationGraphs,
                     getPressureGraphs = container.getPressureGraphs
                 ) as T
             }
@@ -170,7 +170,7 @@ sealed interface EssentialGraphsState {
         val precipTotals: List<PrecipitationTotal>,
         val windGraphs: WindGraphs,
         val pressureGraphs: PressureGraphs,
-        val sunshineDurationGraphs: SunshineDurationGraphs,
+        val directRadiationGraphs: DirectRadiationGraphs,
     ) : EssentialGraphsState
 
     data object Loading : EssentialGraphsState

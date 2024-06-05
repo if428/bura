@@ -89,6 +89,7 @@ class ForecastDataCacher(private val root: File) {
                 rain = record.getJSONArray("rain").mapToList { Rain.fromMillimeters(it.toDouble()) },
                 showers = record.getJSONArray("showers").mapToList { Showers.fromMillimeters(it.toDouble()) },
                 snow = record.getJSONArray("snow").mapToList { Snow.fromMillimeters(it.toDouble()) },
+                directionRadiation = record.getJSONArray("directRadiation").mapToList { it.toDouble() },
                 uvIndex = record.getJSONArray("uvIndex").mapToList { UvIndex(it.toInt()) },
                 windSpeed = record.getJSONArray("windSpeed").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) },
                 windDirection = record.getJSONArray("windDirection").mapToList { WindDirection(it.toDouble()) },
@@ -116,6 +117,7 @@ class ForecastDataCacher(private val root: File) {
                 put("rain", data.rain.mapToJSONArray { it.convertTo(Precipitation.Unit.Millimeters).value })
                 put("showers", data.showers.mapToJSONArray { it.convertTo(Precipitation.Unit.Millimeters).value })
                 put("snow", data.snow.mapToJSONArray { it.convertTo(Precipitation.Unit.Millimeters).value })
+                put("directRadiation", data.directionRadiation.mapToJSONArray { it })
                 put("uvIndex", data.uvIndex.mapToJSONArray { it.value })
                 put("windSpeed", data.windSpeed.mapToJSONArray { it.convertTo(WindSpeed.Unit.MetersPerSecond).value })
                 put("windDirection", data.windDirection.mapToJSONArray { it.degrees })

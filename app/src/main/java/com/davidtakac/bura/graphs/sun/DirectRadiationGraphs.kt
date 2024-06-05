@@ -20,31 +20,32 @@ import com.davidtakac.bura.forecast.ForecastResult
 import com.davidtakac.bura.units.Units
 import com.davidtakac.bura.graphs.common.GraphTime
 import com.davidtakac.bura.place.Coordinates
-import com.davidtakac.bura.sun.HourlySunshineDurationMoment
-import com.davidtakac.bura.sun.HourlySunshineDurationRepository
-import com.davidtakac.bura.sun.SunshineDurationPeriod
+import com.davidtakac.bura.sun.DirectRadiationMoment
+import com.davidtakac.bura.sun.DirectRadiationPeriod
+import com.davidtakac.bura.sun.DirectRadiationRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class GetSunshineDurationGraphs(
-    private val sunshineDurationRepository: HourlySunshineDurationRepository,
+class GetDirectRadiationGraphs(
+    private val directRadiationRepository: DirectRadiationRepository,
     private val conditionRepository: ConditionRepository,
 ) {
     suspend operator fun invoke(
         coords: Coordinates,
         units: Units,
         now: LocalDateTime
-    ): ForecastResult<SunshineDurationGraphs> {
-        val sunshineDurationPeriod = sunshineDurationRepository.period(coords, units) ?: return ForecastResult.FailedToDownload
+    ): ForecastResult<DirectRadiationGraphs> {
+        val directRadiationPeriod = directRadiationRepository.period(coords, units) ?: return ForecastResult.FailedToDownload
         val conditionPeriod = conditionRepository.period(coords, units) ?: return ForecastResult.FailedToDownload
 
-        val hourlySunshineDurationDays = sunshineDurationPeriod.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
+        val directRadiationDays = directRadiationPeriod.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
         val conditionDays = conditionPeriod.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
         return ForecastResult.Success(
-            data = SunshineDurationGraphs(
+            data = DirectRadiationGraphs(
+                max = directRadiationDays.maxOf { it.maxOf { it.directRadiation } },
                 graphs = getGraphs(
                     now = now,
-                    sunshineDurationDays = hourlySunshineDurationDays,
+                    directRadiationDays = directRadiationDays,
                     conditionDays = conditionDays,
                 )
             )
@@ -53,16 +54,16 @@ class GetSunshineDurationGraphs(
 
     private fun getGraphs(
         now: LocalDateTime,
-        sunshineDurationDays: List<SunshineDurationPeriod>,
+        directRadiationDays: List<DirectRadiationPeriod>,
         conditionDays: List<ConditionPeriod>,
-    ): List<SunshineDurationGraph> = buildList {
-        for (i in sunshineDurationDays.indices) {
+    ): List<DirectRadiationGraph> = buildList {
+        for (i in directRadiationDays.indices) {
             add(
                 getGraph(
                     now = now,
-                    sunshineDurationDay = sunshineDurationDays[i],
+                    directRadiationDay = directRadiationDays[i],
                     conditionDay = conditionDays[i],
-                    nextSunshineDurationDay = sunshineDurationDays.getOrNull(i + 1),
+                    nextDirectionRadiationDay = directRadiationDays.getOrNull(i + 1),
                     nextConditionDay = conditionDays.getOrNull(i + 1),
                 )
             )
@@ -71,27 +72,27 @@ class GetSunshineDurationGraphs(
 
     private fun getGraph(
         now: LocalDateTime,
-        sunshineDurationDay: SunshineDurationPeriod,
+        directRadiationDay: DirectRadiationPeriod,
         conditionDay: ConditionPeriod,
-        nextSunshineDurationDay: SunshineDurationPeriod?,
+        nextDirectionRadiationDay: DirectRadiationPeriod?,
         nextConditionDay: ConditionPeriod?
-    ): SunshineDurationGraph {
-        return SunshineDurationGraph(
-            day = sunshineDurationDay.first().hour.toLocalDate(),
+    ): DirectRadiationGraph {
+        return DirectRadiationGraph(
+            day = directRadiationDay.first().hour.toLocalDate(),
             points = buildList {
-                for (i in sunshineDurationDay.indices) {
+                for (i in directRadiationDay.indices) {
                     add(
                         getPoint(
                             now = now,
-                            sunshineDurationMoment = sunshineDurationDay[i],
+                            dierectRadiationMoment = directRadiationDay[i],
                             conditionMoment = conditionDay[i],
                         )
                     )
                 }
-                val firstSunshineDurationTomorrow = nextSunshineDurationDay?.firstOrNull()
+                val firstDirectRadiationTomorrow = nextDirectionRadiationDay?.firstOrNull()
                 val firstConditionsTomorrow = nextConditionDay?.firstOrNull()
                 if (
-                    firstSunshineDurationTomorrow != null &&
+                    firstDirectRadiationTomorrow != null &&
                     firstConditionsTomorrow != null
                     ) {
                     // The periods must match, so if there is a first temp tomorrow, there
@@ -99,7 +100,7 @@ class GetSunshineDurationGraphs(
                     add(
                         getPoint(
                             now = now,
-                            sunshineDurationMoment = firstSunshineDurationTomorrow,
+                            dierectRadiationMoment = firstDirectRadiationTomorrow,
                             conditionMoment = firstConditionsTomorrow,
                         )
                     )
@@ -110,32 +111,33 @@ class GetSunshineDurationGraphs(
 
     private fun getPoint(
         now: LocalDateTime,
-        sunshineDurationMoment: HourlySunshineDurationMoment,
+        dierectRadiationMoment: DirectRadiationMoment,
         conditionMoment: ConditionMoment,
-    ): SunshineDurationGraphPoint = SunshineDurationGraphPoint(
-        time = GraphTime(sunshineDurationMoment.hour, now),
+    ): DirectRadiationGraphPoint = DirectRadiationGraphPoint(
+        time = GraphTime(dierectRadiationMoment.hour, now),
         condition = Condition(wmoCode = conditionMoment.condition.wmoCode, isDay = conditionMoment.condition.isDay),
-        sunshineDuration = GraphSunshineDuration(
-            value = sunshineDurationMoment.sunshineDuration,
+        directRadiation = GraphDirectRadiation(
+            value = dierectRadiationMoment.directRadiation,
         ),
     )
 }
 
-data class SunshineDurationGraphs(
-    val graphs: List<SunshineDurationGraph>
+data class DirectRadiationGraphs(
+    val max: Double,
+    val graphs: List<DirectRadiationGraph>
 )
 
-data class SunshineDurationGraph(
+data class DirectRadiationGraph(
     val day: LocalDate,
-    val points: List<SunshineDurationGraphPoint>
+    val points: List<DirectRadiationGraphPoint>
 )
 
-data class SunshineDurationGraphPoint(
+data class DirectRadiationGraphPoint(
     val time: GraphTime,
     val condition: Condition,
-    val sunshineDuration: GraphSunshineDuration,
+    val directRadiation: GraphDirectRadiation,
 )
 
-data class GraphSunshineDuration(
+data class GraphDirectRadiation(
     val value: Double,
 )

@@ -93,6 +93,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             // Open-Meteo returns snow in centimeters
             val snowfall = hourly.getJSONArray("snowfall").mapToList { Snow.fromMillimeters(value = it.toDouble() * 10) }
             val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration").mapToList { it.toDouble() / 60.0 }
+            val directionRadiation = hourly.getJSONArray("direct_radiation").mapToList { it.toDouble() }
             val uvIndex = hourly.getJSONArray("uv_index").mapToList { UvIndex(it.toDouble().toInt()) }
             val windSpeed = hourly.getJSONArray("wind_speed_10m").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
             val windDirection = hourly.getJSONArray("wind_direction_10m").mapToList { WindDirection(it.toDouble()) }
@@ -118,6 +119,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
                 rain = rain,
                 showers = showers,
                 snow = snowfall,
+                directionRadiation = directionRadiation,
                 uvIndex = uvIndex,
                 windSpeed = windSpeed,
                 windDirection = windDirection,
@@ -148,6 +150,7 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             "wind_speed_10m",
             "wind_direction_10m",
             "wind_gusts_10m",
+            "direct_radiation",
             "uv_index",
             "is_day",
         ).joinToString(",")

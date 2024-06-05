@@ -12,8 +12,10 @@
 
 package com.davidtakac.bura.common
 
+import android.util.Log
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 data class AppColors(
@@ -26,6 +28,7 @@ data class AppColors(
     val showersColor: Color,
     val snowColor: Color,
     val precipitationColor: Color,
+    val directRadiationColor: Map<Double, Color>,
 ) {
     fun temperatureColors(fromCelsius: Double, toCelsius: Double): List<Color> =
         temperatureColors.slice(getIndexOfNearestColorTemperature(fromCelsius)..getIndexOfNearestColorTemperature(toCelsius))
@@ -53,6 +56,10 @@ data class AppColors(
     }
 
     companion object {
+        fun getDirectRadiationColor(value: Double): Color {
+            val index = floor( value.coerceAtMost(1200.0) / 60.0) * 60.0
+            return directRadiationColorsWattsPerSquareMeters[index] ?: throw Exception("Color for direct radiation value ${value} W/m^2 not found")
+        }
         val ForDarkTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
             windSpeedColorsMetersPerSecond = darkWindSpeedColorsMetersPerSecond,
@@ -63,6 +70,7 @@ data class AppColors(
             showersColor = Color(0xFF4DB6AC),
             snowColor = Color(0xFFE0E0E0),
             precipitationColor = Color(0xFF9575CD),
+            directRadiationColor = directRadiationColorsWattsPerSquareMeters,
         )
 
         val ForLightTheme get() = AppColors(
@@ -75,6 +83,7 @@ data class AppColors(
             showersColor = Color(0xFF009688),
             snowColor = Color(0xFF9E9E9E),
             precipitationColor = Color(0xFF3F51B5),
+            directRadiationColor = directRadiationColorsWattsPerSquareMeters,
         )
     }
 }
@@ -89,9 +98,34 @@ val LocalAppColors = staticCompositionLocalOf {
         showersColor = Color.Unspecified,
         snowColor = Color.Unspecified,
         precipitationColor = Color.Unspecified,
+        directRadiationColor = mapOf(),
         uvIndexColors = mapOf()
     )
 }
+
+private val directRadiationColorsWattsPerSquareMeters = mapOf(
+    0.0 to Color(128, 128, 128),
+    60.0 to Color(180, 180, 180),
+    120.0 to Color(190, 190, 170),
+    180.0 to Color(210, 210, 150),
+    240.0 to Color(220, 220, 130),
+    300.0 to Color(220, 220, 110),
+    360.0 to Color(230, 230, 80),
+    420.0 to Color(240, 240, 20),
+    480.0 to Color(240, 220, 40),
+    540.0 to Color(240, 200, 40),
+    600.0 to Color(240, 180, 40),
+    660.0 to Color(240, 160, 40),
+    720.0 to Color(240, 140, 40),
+    780.0 to Color(240, 120, 40),
+    840.0 to Color(240, 100, 40),
+    900.0 to Color(240, 60, 60),
+    960.0 to Color(240, 40, 100),
+    1020.0 to Color(240, 40, 140),
+    1080.0 to Color(240, 40, 180),
+    1140.0 to Color(240, 40, 220),
+    1200.0 to Color(240, 80, 230),
+)
 
 private val darkPressureColorsHectopascal = listOf(
     Color(190, 190, 190), // 920

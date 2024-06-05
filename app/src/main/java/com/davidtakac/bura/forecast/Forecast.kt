@@ -22,6 +22,7 @@ import com.davidtakac.bura.temperature.TemperaturePeriod
 import com.davidtakac.bura.uvindex.UvIndexPeriod
 import com.davidtakac.bura.visibility.VisibilityPeriod
 import com.davidtakac.bura.condition.ConditionPeriod
+import com.davidtakac.bura.sun.DirectRadiationPeriod
 import com.davidtakac.bura.sun.SunshineDurationPeriod
 import com.davidtakac.bura.temperature.DewpointPeriod
 import com.davidtakac.bura.temperature.FeelsLikePeriod
@@ -36,6 +37,7 @@ data class Forecast(
     val sun: SunPeriod?,
     val pop: PopPeriod,
     val precipitation: PrecipitationPeriod,
+    val directionRadiation: DirectRadiationPeriod,
     val uvIndex: UvIndexPeriod,
     val wind: WindPeriod,
     val gust: GustPeriod,
@@ -53,6 +55,7 @@ data class Forecast(
             wetbulb,
             pop,
             precipitation,
+            directionRadiation,
             uvIndex,
             wind,
             gust,

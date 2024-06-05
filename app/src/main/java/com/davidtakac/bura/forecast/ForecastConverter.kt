@@ -36,6 +36,8 @@ import com.davidtakac.bura.condition.Condition
 import com.davidtakac.bura.condition.ConditionMoment
 import com.davidtakac.bura.condition.ConditionPeriod
 import com.davidtakac.bura.precipitation.MixedPrecipitation
+import com.davidtakac.bura.sun.DirectRadiationMoment
+import com.davidtakac.bura.sun.DirectRadiationPeriod
 import com.davidtakac.bura.sun.HourlySunshineDurationMoment
 import com.davidtakac.bura.sun.SunshineDurationPeriod
 import com.davidtakac.bura.temperature.DewpointMoment
@@ -59,6 +61,7 @@ class ForecastConverter {
             val wetbulbMoments = mutableListOf<WetbulbMoment>()
             val popMoments = mutableListOf<PopMoment>()
             val precipMoments = mutableListOf<PrecipitationMoment>()
+            val directRadiationMoments = mutableListOf<DirectRadiationMoment>()
             val uvIndexMoments = mutableListOf<UvIndexMoment>()
             val windMoments = mutableListOf<WindMoment>()
             val gustMoments = mutableListOf<GustMoment>()
@@ -79,6 +82,7 @@ class ForecastConverter {
                 val showers = data.showers[i].convertTo(toUnits.showers)
                 val snowfall = data.snow[i].convertTo(toUnits.snow)
                 precipMoments.add(PrecipitationMoment(time, MixedPrecipitation.fromMillimeters(rain, showers, snowfall).convertTo(toUnits.precipitation)))
+                directRadiationMoments.add(DirectRadiationMoment(time, data.directionRadiation[i]))
                 uvIndexMoments.add(UvIndexMoment(time, data.uvIndex[i]))
                 windMoments.add(WindMoment(time, Wind(speed = data.windSpeed[i].convertTo(toUnits.windSpeed), from = data.windDirection[i], gusts = data.gustSpeed[i].convertTo(toUnits.windSpeed))))
                 gustMoments.add(GustMoment(time, data.gustSpeed[i].convertTo(toUnits.windSpeed)))
@@ -95,6 +99,7 @@ class ForecastConverter {
             val wetbulb = WetbulbPeriod(wetbulbMoments)
             val pop = PopPeriod(popMoments)
             val precipitation = PrecipitationPeriod(precipMoments)
+            val directRadiation = DirectRadiationPeriod(directRadiationMoments)
             val uvIndex = UvIndexPeriod(uvIndexMoments)
             val wind = WindPeriod(windMoments)
             val gust = GustPeriod(gustMoments)
@@ -126,6 +131,7 @@ class ForecastConverter {
                 visibility = visibility,
                 humidity = humidity,
                 sunshineDuration = sunshineDuration,
+                directionRadiation = directRadiation,
                 weatherDescription = weatherDescription
             )
         }
