@@ -57,7 +57,7 @@ data class AppColors(
 
     companion object {
         fun getDirectRadiationColor(value: Double): Color {
-            val index = floor( value.coerceAtMost(1200.0) / 60.0) * 60.0
+            val index = floor( value.coerceIn(0.0, 1200.0) / 60.0) * 60.0
             return directRadiationColorsWattsPerSquareMeters[index] ?: throw Exception("Color for direct radiation value ${value} W/m^2 not found")
         }
         val ForDarkTheme get() = AppColors(
