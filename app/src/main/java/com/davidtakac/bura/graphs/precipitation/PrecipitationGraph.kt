@@ -153,7 +153,7 @@ private fun DrawScope.drawHorizontalAxisAndBars(
         val bottomOfGraph = size.height - args.bottomGutter
         val topOfRain = bottomOfGraph - rainHeight
 
-        val barX = if (i == 0) x + desiredBarWidth / 4 else x
+        val barX = if (i == 0) x + desiredBarWidth / 4 else x - desiredBarWidth / 1.2f
         val barWidth = if (i == 0) desiredBarWidth / 2 else desiredBarWidth
         drawLine(
             brush = SolidColor(rainColor),
