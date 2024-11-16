@@ -147,7 +147,7 @@ fun DaySummaryRow(
                             style = MaterialTheme.typography.bodySmall,
                             color = when  {
                                 precipitationAmount <= 0.0 -> Color.LightGray
-                                precipitationAmount < 1.0 -> Color(163, 201, 204)  // hsv(185, 20, 80)
+                                precipitationAmount < 1.0 -> Color(163, 204, 201)  // hsv(175, 20, 80)
                                 precipitationAmount < 5.0 -> Color(130, 170, 220)  // hsv(213, 41, 86)
                                 precipitationAmount < 10.0 -> Color(96, 132, 204)  // hsv(220, 53, 80)
                                 precipitationAmount < 20.0 -> Color(36, 81, 171)   // hsv(220, 79, 67)
