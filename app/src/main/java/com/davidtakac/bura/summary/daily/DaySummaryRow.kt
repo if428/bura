@@ -146,11 +146,11 @@ fun DaySummaryRow(
                             text = state.precipitation.string(),
                             style = MaterialTheme.typography.bodySmall,
                             color = when  {
-                                precipitationAmount <= 0.0 -> Color.Black
-                                precipitationAmount < 1.0 -> Color(163, 201, 204) // hsv(185, 20, 80)
-                                precipitationAmount < 5.0 -> Color(130, 170, 220) // hsv(213, 41, 86)
-                                precipitationAmount < 10.0 -> Color(95, 122, 204) // hsv(225, 53, 80)
-                                precipitationAmount < 20.0 -> Color(80, 80, 220)  // hsv(240, 64, 86)
+                                precipitationAmount <= 0.0 -> Color.LightGray
+                                precipitationAmount < 1.0 -> Color(163, 201, 204)  // hsv(185, 20, 80)
+                                precipitationAmount < 5.0 -> Color(130, 170, 220)  // hsv(213, 41, 86)
+                                precipitationAmount < 10.0 -> Color(96, 132, 204)  // hsv(220, 53, 80)
+                                precipitationAmount < 20.0 -> Color(36, 81, 171)   // hsv(220, 79, 67)
                                 precipitationAmount < 40.0 -> Color(120, 80, 200)
                                 precipitationAmount < 100.0 -> Color(200, 60, 200)
                                 precipitationAmount < 200.0 -> Color(200, 60, 100)
