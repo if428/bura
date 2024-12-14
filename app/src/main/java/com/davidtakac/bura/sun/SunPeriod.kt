@@ -37,7 +37,7 @@ class SunPeriod(val moments: List<SunMoment>) {
         var previousMoment = moments[0]
         for (i in 1..moments.lastIndex) {
             val nextMoment = moments[i]
-            require(previousMoment.time < nextMoment.time) {
+            require(previousMoment.time <= nextMoment.time) {
                 "Moments of SunPeriod must be sorted, but contained ${previousMoment.time} before ${nextMoment.time}."
             }
             previousMoment = nextMoment
