@@ -28,7 +28,7 @@ data class AppColors(
     val showersColor: Color,
     val snowColor: Color,
     val precipitationColor: Color,
-    val directRadiationColor: Map<Double, Color>,
+    val directRadiationColor: Map<Int, Color>,
 ) {
     fun temperatureColors(fromCelsius: Double, toCelsius: Double): List<Color> =
         temperatureColors.slice(getIndexOfNearestColorTemperature(fromCelsius)..getIndexOfNearestColorTemperature(toCelsius))
@@ -57,9 +57,8 @@ data class AppColors(
 
     companion object {
         fun getDirectRadiationColor(value: Double): Color {
-            val valueForColorLookup: Double = if(value < 0.0) 0.0 else value
-            val index = floor( valueForColorLookup.coerceIn(0.0, 1200.0) / 60.0) * 60.0
-            return directRadiationColorsWattsPerSquareMeters[index] ?: throw Exception("Color for direct radiation value ${value} W/m^2 not found")
+            val index = (floor( value.coerceIn(0.0, 1200.0) / 60.0) * 60.0).toInt()
+            return directRadiationColorsWattsPerSquareMeters[index] ?: throw Exception("Color for direct radiation value ${value} W/m^2 on index ${index} not found")
         }
         val ForDarkTheme get() = AppColors(
             temperatureColors = darkTemperatureColors,
@@ -105,27 +104,27 @@ val LocalAppColors = staticCompositionLocalOf {
 }
 
 private val directRadiationColorsWattsPerSquareMeters = mapOf(
-    0.0 to Color(128, 128, 128),
-    60.0 to Color(180, 180, 180),
-    120.0 to Color(190, 190, 170),
-    180.0 to Color(210, 210, 150),
-    240.0 to Color(220, 220, 130),
-    300.0 to Color(220, 220, 110),
-    360.0 to Color(230, 230, 80),
-    420.0 to Color(240, 240, 20),
-    480.0 to Color(240, 220, 40),
-    540.0 to Color(240, 200, 40),
-    600.0 to Color(240, 180, 40),
-    660.0 to Color(240, 160, 40),
-    720.0 to Color(240, 140, 40),
-    780.0 to Color(240, 120, 40),
-    840.0 to Color(240, 100, 40),
-    900.0 to Color(240, 60, 60),
-    960.0 to Color(240, 40, 100),
-    1020.0 to Color(240, 40, 140),
-    1080.0 to Color(240, 40, 180),
-    1140.0 to Color(240, 40, 220),
-    1200.0 to Color(240, 80, 230),
+    0 to Color(128, 128, 128),
+    60 to Color(180, 180, 180),
+    120 to Color(190, 190, 170),
+    180 to Color(210, 210, 150),
+    240 to Color(220, 220, 130),
+    300 to Color(220, 220, 110),
+    360 to Color(230, 230, 80),
+    420 to Color(240, 240, 20),
+    480 to Color(240, 220, 40),
+    540 to Color(240, 200, 40),
+    600 to Color(240, 180, 40),
+    660 to Color(240, 160, 40),
+    720 to Color(240, 140, 40),
+    780 to Color(240, 120, 40),
+    840 to Color(240, 100, 40),
+    900 to Color(240, 60, 60),
+    960 to Color(240, 40, 100),
+    1020 to Color(240, 40, 140),
+    1080 to Color(240, 40, 180),
+    1140 to Color(240, 40, 220),
+    1200 to Color(240, 80, 230),
 )
 
 private val darkPressureColorsHectopascal = listOf(
