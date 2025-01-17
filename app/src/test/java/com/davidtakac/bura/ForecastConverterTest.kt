@@ -131,7 +131,10 @@ class ForecastConverterTest {
             wmoCode = wmoCodes,
             isDay = isDay,
             sunrises = sunrises,
-            sunsets = sunsets
+            sunsets = sunsets,
+            wetbulbTemperature = arrayListOf(Temperature.fromDegreesCelsius(0.0)),
+            directionRadiation = arrayListOf(0.0),
+            sunshineDurationMinutes = arrayListOf(0.0)
         )
         val forecast = ForecastConverter().fromData(forecastData, toUnits = imperial)
         assertTrue(forecast.temperature.all { it.temperature.unit == imperial.temperature })
@@ -231,7 +234,10 @@ class ForecastConverterTest {
             wmoCode = wmoCodes,
             isDay = isDay,
             sunrises = sunrises,
-            sunsets = sunsets
+            sunsets = sunsets,
+            wetbulbTemperature = arrayListOf(Temperature.fromDegreesCelsius(0.0)),
+            directionRadiation = arrayListOf(0.0),
+            sunshineDurationMinutes = arrayListOf(0.0)
         )
         ForecastConverter().fromData(forecastData, units)
     }
