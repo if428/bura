@@ -72,8 +72,8 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val daily = json.getJSONObject("daily")
             // When a day has no sunrise or sunset, Open-Meteo returns epoch second 0, but the app
             // expects an omitted timestamp. These filters drop such placeholders.
-            val sunrises = daily.getJSONArray("sunrise").mapToList(LocalDateTime::parse).filter { it.year != 1970 }
-            val sunsets = daily.getJSONArray("sunset").mapToList(LocalDateTime::parse).filter { it.year != 1970 }
+            val sunrises = daily.getJSONArray("sunrise_icon_seamless").mapToList(LocalDateTime::parse).filter { it.year != 1970 }
+            val sunsets = daily.getJSONArray("sunset_icon_seamless").mapToList(LocalDateTime::parse).filter { it.year != 1970 }
 
             val hourly = json.getJSONObject("hourly")
 
@@ -82,25 +82,25 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val times = hourly.getJSONArray("time").mapToList(LocalDateTime::parse)
             val indexOfLast23HourInstant = times.indexOfLast { it.toLocalTime() == LocalTime.parse("23:00") }
             val timesProcessed = times.slice(0..indexOfLast23HourInstant)
-            val temperature = hourly.getJSONArray("temperature_2m").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val feelsLikeTemperature = hourly.getJSONArray("apparent_temperature").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val dewPointTemperature = hourly.getJSONArray("dew_point_2m").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val wmoCode = hourly.getJSONArray("weather_code").mapToList(String::toInt)
-            val isDay = hourly.getJSONArray("is_day").mapToList(String::toInt).map { it == 1 }
-            val pop = hourly.getJSONArray("precipitation_probability").mapToList { Pop(it.toDouble()) }
-            val rain = hourly.getJSONArray("rain").mapToList { Rain.fromMillimeters(it.toDouble()) }
-            val showers = hourly.getJSONArray("showers").mapToList { Showers.fromMillimeters(it.toDouble()) }
+            val temperature = hourly.getJSONArray("temperature_2m_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
+            val feelsLikeTemperature = hourly.getJSONArray("apparent_temperature_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
+            val dewPointTemperature = hourly.getJSONArray("dew_point_2m_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
+            val wmoCode = hourly.getJSONArray("weather_code_icon_seamless").mapToList(String::toInt)
+            val isDay = hourly.getJSONArray("is_day_icon_seamless").mapToList(String::toInt).map { it == 1 }
+            val pop = hourly.getJSONArray("precipitation_probability_icon_seamless").mapToList { Pop(it.toDouble()) }
+            val rain = hourly.getJSONArray("rain_icon_seamless").mapToList { Rain.fromMillimeters(it.toDouble()) }
+            val showers = hourly.getJSONArray("showers_icon_seamless").mapToList { Showers.fromMillimeters(it.toDouble()) }
             // Open-Meteo returns snow in centimeters
-            val snowfall = hourly.getJSONArray("snowfall").mapToList { Snow.fromMillimeters(value = it.toDouble() * 10) }
-            val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration").mapToList { it.toDouble() / 60.0 }
-            val directionRadiation = hourly.getJSONArray("direct_radiation").mapToList { it.toDouble() }
-            val uvIndex = hourly.getJSONArray("uv_index").mapToList { UvIndex(it.toDouble().toInt()) }
-            val windSpeed = hourly.getJSONArray("wind_speed_10m").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
-            val windDirection = hourly.getJSONArray("wind_direction_10m").mapToList { WindDirection(it.toDouble()) }
-            val gustSpeed = hourly.getJSONArray("wind_gusts_10m").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
-            val visibility = hourly.getJSONArray("visibility").mapToList { Visibility.fromMeters(it.toDouble()) }
-            val humidity = hourly.getJSONArray("relative_humidity_2m").mapToList { Humidity(it.toDouble()) }
-            val pressure = hourly.getJSONArray("pressure_msl").mapToList { Pressure.fromHectopascal(it.toDouble()) }
+            val snowfall = hourly.getJSONArray("snowfall_icon_seamless").mapToList { Snow.fromMillimeters(value = it.toDouble() * 10) }
+            val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration_icon_seamless").mapToList { it.toDouble() / 60.0 }
+            val directionRadiation = hourly.getJSONArray("direct_radiation_icon_seamless").mapToList { it.toDouble() }
+            val uvIndex = hourly.getJSONArray("uv_index_best_match").mapToList { UvIndex(it.toDouble().toInt()) }
+            val windSpeed = hourly.getJSONArray("wind_speed_10m_icon_seamless").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
+            val windDirection = hourly.getJSONArray("wind_direction_10m_icon_seamless").mapToList { WindDirection(it.toDouble()) }
+            val gustSpeed = hourly.getJSONArray("wind_gusts_10m_icon_seamless").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
+            val visibility = hourly.getJSONArray("visibility_best_match").mapToList { Visibility.fromMeters(it.toDouble()) }
+            val humidity = hourly.getJSONArray("relative_humidity_2m_icon_seamless").mapToList { Humidity(it.toDouble()) }
+            val pressure = hourly.getJSONArray("pressure_msl_icon_seamless").mapToList { Pressure.fromHectopascal(it.toDouble()) }
             val wetbulb = arrayListOf<Temperature>()
             for (time in times) {
                 wetbulb.add(Temperature.fromDegreesCelsius(-100.0))
@@ -167,7 +167,8 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
                 "&wind_speed_unit=ms" +
                 // timezone=auto returns whole days for the desired location
                 "&timezone=auto" +
-                "&past_days=1"
+                "&past_days=1" +
+                "&models=best_match,icon_seamless"
     }
 
     private fun formatCoordinate(value: Double): String = String.format(Locale.ROOT, "%.2f", value)
