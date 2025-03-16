@@ -15,8 +15,8 @@ package com.davidtakac.bura.wind
 import java.util.Objects
 import kotlin.math.ceil
 
-class WindDirection(degrees: Double) {
-    val degrees: Double = degrees + ceil(-degrees / 360) * 360
+class WindDirection(_degrees: Double) {
+    val degrees: Double = _degrees
     val compass: Compass = Compass.entries[(degrees / 22.5 + 0.5).toInt() % 16]
 
     enum class Compass {

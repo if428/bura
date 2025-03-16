@@ -35,6 +35,7 @@ data class AppIcons(
     @DrawableRes val thunderstormWithHail: Int,
     @DrawableRes val sunrise: Int,
     @DrawableRes val sunset: Int,
+    @DrawableRes val unknown: Int,
 ) {
     companion object {
         val ForLightTheme get() = AppIcons(
@@ -55,7 +56,8 @@ data class AppIcons(
             thunderstormWithRain = R.drawable.thunderstorm_with_rain_for_light,
             thunderstormWithHail = R.drawable.thunderstorm_with_hail_for_light,
             sunrise = R.drawable.sunrise_for_light,
-            sunset = R.drawable.sunset_for_light
+            sunset = R.drawable.sunset_for_light,
+            unknown = R.drawable.unknown,
         )
 
         val ForDarkTheme get() = AppIcons(
@@ -76,8 +78,9 @@ data class AppIcons(
             thunderstormWithRain = R.drawable.thunderstorm_with_rain_for_dark,
             thunderstormWithHail = R.drawable.thunderstorm_with_hail_for_dark,
             sunrise = R.drawable.sunrise_for_dark,
-            sunset = R.drawable.sunset_for_dark
-        )
+            sunset = R.drawable.sunset_for_dark,
+            unknown = R.drawable.unknown,
+            )
     }
 }
 
@@ -100,6 +103,7 @@ val LocalAppIcons = staticCompositionLocalOf {
         thunderstormWithHail = 0,
         thunderstormWithRain = 0,
         sunrise = 0,
-        sunset = 0
+        sunset = 0,
+        unknown = 0
     )
 }

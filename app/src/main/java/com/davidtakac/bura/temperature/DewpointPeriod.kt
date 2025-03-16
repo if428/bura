@@ -17,7 +17,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class DewpointPeriod(moments: List<DewpointMoment>) : HourPeriod<DewpointMoment>(moments) {
-    val minimum get() = minOf { it.temperature }
+    private var dewpointMinimum = 120.0
+    val minimum get() = minOf { dewpointMinimum(it.temperature) }
 
     val maximum get() = maxOf { it.temperature }
 
@@ -29,4 +30,8 @@ class DewpointPeriod(moments: List<DewpointMoment>) : HourPeriod<DewpointMoment>
 
     override fun daysFrom(dayInclusive: LocalDate, takeDays: Int?) =
         super.daysFrom(dayInclusive, takeDays)?.map { DewpointPeriod(it) }
+
+    private fun dewpointMinimum(temperature: Temperature): Temperature {
+        return if (temperature.value < -90.0) Temperature.fromDegreesCelsius(dewpointMinimum) else {dewpointMinimum = temperature.value; return temperature}
+    }
 }

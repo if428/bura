@@ -47,7 +47,7 @@ fun TemperatureGraphSummary(state: TemperatureGraphSummary, modifier: Modifier =
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(state.maxTemp.string())
                         Text(
-                            text = state.minTemp.string(),
+                            text = if (state.minTemp.value < -90.0)  "--" else state.minTemp.string(),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

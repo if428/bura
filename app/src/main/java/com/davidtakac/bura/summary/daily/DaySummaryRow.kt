@@ -143,7 +143,7 @@ fun DaySummaryRow(
                               },
                     precipitationAmount = {
                         Text(
-                            text = state.precipitation.string(),
+                            text = if (state.precipitation.value < 0.0) "--" else state.precipitation.string(),
                             style = MaterialTheme.typography.bodySmall,
                             color = when  {
                                 precipitationAmount <= 0.0 -> Color.LightGray

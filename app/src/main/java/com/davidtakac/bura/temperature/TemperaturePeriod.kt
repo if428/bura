@@ -17,7 +17,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class TemperaturePeriod(moments: List<TemperatureMoment>) : HourPeriod<TemperatureMoment>(moments) {
-    val minimum get() = minOf { it.temperature }
+    private var currentMinimum = 120.0
+    val minimum get() = minOf { setMinimum(it.temperature) }
 
     val maximum get() = maxOf { it.temperature }
 
@@ -29,4 +30,9 @@ class TemperaturePeriod(moments: List<TemperatureMoment>) : HourPeriod<Temperatu
 
     override fun daysFrom(dayInclusive: LocalDate, takeDays: Int?) =
         super.daysFrom(dayInclusive, takeDays)?.map { TemperaturePeriod(it) }
+
+
+    private fun setMinimum(temperature: Temperature): Temperature {
+        return if (temperature.value < -90.0) Temperature.fromDegreesCelsius(currentMinimum) else { currentMinimum = temperature.value; return temperature }
+    }
 }

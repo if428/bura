@@ -16,6 +16,7 @@ import com.davidtakac.bura.forecast.ForecastResult
 import com.davidtakac.bura.graphs.common.GraphTime
 import com.davidtakac.bura.place.Coordinates
 import com.davidtakac.bura.pressure.Pressure
+import com.davidtakac.bura.pressure.PressureMoment
 import com.davidtakac.bura.pressure.PressureRepository
 import com.davidtakac.bura.units.Units
 import java.time.LocalDate
@@ -24,6 +25,12 @@ import java.time.LocalDateTime
 class GetPressureGraphs(
     private val pressurePeriodRepo: PressureRepository,
 ) {
+    private var minimumPressure = 1100.0
+
+    private fun minimumPressureValue(pressure: Pressure): Pressure {
+        return if (pressure.value < 900.0) Pressure.fromHectopascal(minimumPressure) else { minimumPressure = pressure.value; return pressure }
+    }
+
     suspend operator fun invoke(
         coords: Coordinates,
         units: Units,
@@ -31,9 +38,10 @@ class GetPressureGraphs(
     ): ForecastResult<PressureGraphs> {
         val pressure = pressurePeriodRepo.period(coords, units) ?: return ForecastResult.FailedToDownload
         val pressureDays = pressure.daysFrom(now.toLocalDate()) ?: return ForecastResult.Outdated
+
         return ForecastResult.Success(
             data = PressureGraphs(
-                min = pressureDays.minOf { it.minOf { it.pressure } },
+                min = pressureDays.minOf { it.minOf {  minimumPressureValue(it.pressure) } },
                 max = pressureDays.maxOf { it.maxOf { it.pressure } },
                 graphs = pressureDays.mapIndexed { dayIdx, day ->
                     PressureGraph(

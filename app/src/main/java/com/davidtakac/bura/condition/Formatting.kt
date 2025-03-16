@@ -25,6 +25,7 @@ import java.lang.IllegalStateException
 @DrawableRes
 fun Condition.image(context: Context, appIcons: AppIcons): Int =
     when (wmoCode) {
+                   -1 -> appIcons.unknown
         0, 1, // Clear and mostly clear
         -> if (isDay) appIcons.clearDay else appIcons.clearNight
 

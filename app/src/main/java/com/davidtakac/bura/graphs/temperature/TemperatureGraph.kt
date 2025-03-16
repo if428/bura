@@ -301,7 +301,7 @@ private fun DrawScope.drawTempAxis(
 @Preview
 @Composable
 private fun ConditionGraphNowMiddlePreview() {
-    AppTheme {
+   return AppTheme {
         TemperatureGraph(
             state = previewState,
             absMinTemp = previewState.points.minOf { it.temperature.value },

@@ -17,7 +17,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class FeelsLikePeriod(moments: List<FeelsLikeMoment>) : HourPeriod<FeelsLikeMoment>(moments) {
-    val minimum get() = minOf { it.temperature }
+    private var minimumFeelsLike = 120.0
+    val minimum get() = minOf { feelsLikeMinimum(it.temperature) }
 
     val maximum get() = maxOf { it.temperature }
 
@@ -29,4 +30,8 @@ class FeelsLikePeriod(moments: List<FeelsLikeMoment>) : HourPeriod<FeelsLikeMome
 
     override fun daysFrom(dayInclusive: LocalDate, takeDays: Int?) =
         super.daysFrom(dayInclusive, takeDays)?.map { FeelsLikePeriod(it) }
+
+    private fun feelsLikeMinimum(temperature: Temperature): Temperature {
+        return if (temperature.value < -90.0) Temperature.fromDegreesCelsius(minimumFeelsLike) else { minimumFeelsLike = temperature.value; return temperature}
+    }
 }

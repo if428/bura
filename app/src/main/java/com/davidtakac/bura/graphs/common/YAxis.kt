@@ -51,7 +51,11 @@ fun determineTickStep(min: Double, max: Double, maxNumberOfTicks: Int, possibleT
     if (min >= max) {
         throw Exception("min $min >= max $max")
     }
-    return possibleTickSteps.first { ((max - min) / it) <= maxNumberOfTicks.toDouble() }
+    try {
+        return possibleTickSteps.first { ((max - min) / it) <= maxNumberOfTicks.toDouble() }
+    } catch (err: Throwable) {
+        return 1.0
+    }
 }
 
 fun roundUp(value: Double, roundUpTo: Double): Double {

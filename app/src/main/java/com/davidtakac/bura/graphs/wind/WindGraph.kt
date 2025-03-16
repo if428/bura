@@ -132,7 +132,7 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         with(windGustsPlotPath) { if (isEmpty) moveTo(x, y) else lineTo(x, y) }
     }
 
-    var minCenter: Pair<Offset, GraphWindGust>? = null
+    val minCenter: Pair<Offset, GraphWindGust>? = null
     var maxCenter: Pair<Offset, GraphWindGust>? = null
     var nowCenter: Offset? = null
     var lastX = 0f
@@ -159,11 +159,13 @@ private fun DrawScope.drawHorizontalAxisAndPlot(
         if (point.time.meta == GraphTime.Meta.Present) nowCenter = Offset(x, yWindGusts)
 
         // Wind direction indicators
-        val drawable = AppCompatResources.getDrawable(context, R.drawable.navigation_black)
+        val drawable = if (point.direction.degrees < 0.0) AppCompatResources.getDrawable(context, R.drawable.unknown) else AppCompatResources.getDrawable(context, R.drawable.navigation_black)
         val bitmap = drawable!!.toBitmap(width = iconSizeRound, height = iconSizeRound, config = Bitmap.Config.ARGB_8888)
         val destBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
         val tmpCanvas = android.graphics.Canvas(destBitmap)
-        tmpCanvas.rotate(point.direction.degrees.toFloat() + 180f, bitmap.width / 2f, bitmap.height / 2f)
+        if (point.direction.degrees >= 0.0) {
+            tmpCanvas.rotate(point.direction.degrees.toFloat() + 180f, bitmap.width / 2f, bitmap.height / 2f)
+        }
         tmpCanvas.drawBitmap(bitmap, 0f, 0f, null)
 
         if (i % (if (hasSpaceFor12Icons) 2 else 3) == 1) {

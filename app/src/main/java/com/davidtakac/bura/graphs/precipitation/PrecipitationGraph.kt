@@ -155,30 +155,38 @@ private fun DrawScope.drawHorizontalAxisAndBars(
 
         val barX = if (i == 0) x + desiredBarWidth / 4 else x - desiredBarWidth / 1.2f
         val barWidth = if (i == 0) desiredBarWidth / 2 else desiredBarWidth
-        drawLine(
-            brush = SolidColor(rainColor),
-            start = Offset(barX, bottomOfGraph),
-            end = Offset(barX, topOfRain),
-            strokeWidth = barWidth
-        )
 
-        val bottomOfShowers = topOfRain - if (rainHeight > 0) barSpacing else 0f
-        val topOfShowers = bottomOfShowers - showersHeight
-        drawLine(
-            brush = SolidColor(showersColor),
-            start = Offset(barX, bottomOfShowers),
-            end = Offset(barX, topOfShowers),
-            strokeWidth = barWidth
-        )
+        if (rain.value >= 0.0) {
+            drawLine(
+                brush = SolidColor(rainColor),
+                start = Offset(barX, bottomOfGraph),
+                end = Offset(barX, topOfRain),
+                strokeWidth = barWidth
+            )
+        }
 
-        val bottomOfSnow = topOfShowers - if (rainHeight > 0 || showersHeight > 0) barSpacing else 0f
-        val topOfSnow = bottomOfSnow - snowHeight
-        drawLine(
-            brush = SolidColor(snowColor),
-            start = Offset(barX, bottomOfSnow),
-            end = Offset(barX, topOfSnow),
-            strokeWidth = barWidth
-        )
+        if (showers.value >= 0.0) {
+            val bottomOfShowers = topOfRain - if (rainHeight > 0) barSpacing else 0f
+            val topOfShowers = bottomOfShowers - showersHeight
+            drawLine(
+                brush = SolidColor(showersColor),
+                start = Offset(barX, bottomOfShowers),
+                end = Offset(barX, topOfShowers),
+                strokeWidth = barWidth
+            )
+
+            if (snow.value >= 0.0) {
+                val bottomOfSnow =
+                    topOfShowers - if (rainHeight > 0 || showersHeight > 0) barSpacing else 0f
+                val topOfSnow = bottomOfSnow - snowHeight
+                drawLine(
+                    brush = SolidColor(snowColor),
+                    start = Offset(barX, bottomOfSnow),
+                    end = Offset(barX, topOfSnow),
+                    strokeWidth = barWidth
+                )
+            }
+        }
 
         // Condition icons
         if (i % (if (hasSpaceFor12Icons) 2 else 3) == 1) {

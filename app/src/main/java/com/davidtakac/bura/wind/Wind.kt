@@ -19,7 +19,7 @@ class Wind(
     val gusts: WindSpeed,
     val from: WindDirection
 ) {
-    val to: WindDirection = WindDirection(degrees = from.degrees + 180)
+    val to: WindDirection = WindDirection(_degrees = from.degrees + 180)
 
     override fun equals(other: Any?): Boolean =
         other is Wind && other.speed == speed && other.from == from

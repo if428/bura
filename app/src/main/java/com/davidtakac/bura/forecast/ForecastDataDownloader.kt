@@ -12,6 +12,7 @@
 
 package com.davidtakac.bura.forecast
 
+import android.util.Log
 import com.davidtakac.bura.common.UserAgentProvider
 import com.davidtakac.bura.common.mapToList
 import com.davidtakac.bura.humidity.Humidity
@@ -76,31 +77,32 @@ class ForecastDataDownloader(private val userAgentProvider: UserAgentProvider) {
             val sunsets = daily.getJSONArray("sunset_icon_seamless").mapToList(LocalDateTime::parse).filter { it.year != 1970 }
 
             val hourly = json.getJSONObject("hourly")
+            Log.d("ForecastDataDownloader", "hourly: ${hourly.getJSONArray("temperature_2m_icon_seamless")}")
 
             // Open-Meteo sometimes returns only the first hour of the last day. The app expects
             // full 0-23h days, so this slicing is a way to drop such incomplete days.
             val times = hourly.getJSONArray("time").mapToList(LocalDateTime::parse)
             val indexOfLast23HourInstant = times.indexOfLast { it.toLocalTime() == LocalTime.parse("23:00") }
             val timesProcessed = times.slice(0..indexOfLast23HourInstant)
-            val temperature = hourly.getJSONArray("temperature_2m_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val feelsLikeTemperature = hourly.getJSONArray("apparent_temperature_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val dewPointTemperature = hourly.getJSONArray("dew_point_2m_icon_seamless").mapToList { Temperature.fromDegreesCelsius(it.toDouble()) }
-            val wmoCode = hourly.getJSONArray("weather_code_icon_seamless").mapToList(String::toInt)
+            val temperature = hourly.getJSONArray("temperature_2m_icon_seamless").mapToList { if (it == "null") Temperature.fromDegreesCelsius(-99.4) else Temperature.fromDegreesCelsius(it.toDouble()) }
+            val feelsLikeTemperature = hourly.getJSONArray("apparent_temperature_icon_seamless").mapToList { if (it == "null") Temperature.fromDegreesCelsius(-99.4) else Temperature.fromDegreesCelsius(it.toDouble()) }
+            val dewPointTemperature = hourly.getJSONArray("dew_point_2m_icon_seamless").mapToList { if (it == "null") Temperature.fromDegreesCelsius(-99.4) else Temperature.fromDegreesCelsius(it.toDouble()) }
+            val wmoCode = hourly.getJSONArray("weather_code_icon_seamless").mapToList { if (it == "null") -1 else it.toInt() }
             val isDay = hourly.getJSONArray("is_day_icon_seamless").mapToList(String::toInt).map { it == 1 }
-            val pop = hourly.getJSONArray("precipitation_probability_icon_seamless").mapToList { Pop(it.toDouble()) }
-            val rain = hourly.getJSONArray("rain_icon_seamless").mapToList { Rain.fromMillimeters(it.toDouble()) }
-            val showers = hourly.getJSONArray("showers_icon_seamless").mapToList { Showers.fromMillimeters(it.toDouble()) }
+            val pop = hourly.getJSONArray("precipitation_probability_icon_seamless").mapToList { if (it == "null") Pop(-1.0) else Pop(it.toDouble()) }
+            val rain = hourly.getJSONArray("rain_icon_seamless").mapToList {        if (it == "null") Rain.fromMillimeters(-1.0)    else Rain.fromMillimeters(it.toDouble()) }
+            val showers = hourly.getJSONArray("showers_icon_seamless").mapToList {  if (it == "null") Showers.fromMillimeters(-1.0) else Showers.fromMillimeters(it.toDouble()) }
             // Open-Meteo returns snow in centimeters
-            val snowfall = hourly.getJSONArray("snowfall_icon_seamless").mapToList { Snow.fromMillimeters(value = it.toDouble() * 10) }
-            val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration_icon_seamless").mapToList { it.toDouble() / 60.0 }
-            val directionRadiation = hourly.getJSONArray("direct_radiation_icon_seamless").mapToList { it.toDouble() }
+            val snowfall = hourly.getJSONArray("snowfall_icon_seamless").mapToList { if (it == "null") Snow.fromMillimeters(-1.0) else Snow.fromMillimeters(value = it.toDouble() * 10) }
+            val sunshineDurationMinutes = hourly.getJSONArray("sunshine_duration_icon_seamless").mapToList { if (it == "null") -1.0 else it.toDouble() / 60.0 }
+            val directionRadiation = hourly.getJSONArray("direct_radiation_icon_seamless").mapToList { if ( it == "null") -1.0 else it.toDouble() }
             val uvIndex = hourly.getJSONArray("uv_index_best_match").mapToList { UvIndex(it.toDouble().toInt()) }
-            val windSpeed = hourly.getJSONArray("wind_speed_10m_icon_seamless").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
-            val windDirection = hourly.getJSONArray("wind_direction_10m_icon_seamless").mapToList { WindDirection(it.toDouble()) }
-            val gustSpeed = hourly.getJSONArray("wind_gusts_10m_icon_seamless").mapToList { WindSpeed.fromMetersPerSecond(it.toDouble()) }
-            val visibility = hourly.getJSONArray("visibility_best_match").mapToList { Visibility.fromMeters(it.toDouble()) }
-            val humidity = hourly.getJSONArray("relative_humidity_2m_icon_seamless").mapToList { Humidity(it.toDouble()) }
-            val pressure = hourly.getJSONArray("pressure_msl_icon_seamless").mapToList { Pressure.fromHectopascal(it.toDouble()) }
+            val windSpeed = hourly.getJSONArray("wind_speed_10m_icon_seamless").mapToList { if (it == "null") WindSpeed.fromMetersPerSecond(-1.0) else WindSpeed.fromMetersPerSecond(it.toDouble()) }
+            val windDirection = hourly.getJSONArray("wind_direction_10m_icon_seamless").mapToList { if (it == "null") WindDirection(-1.0) else WindDirection(it.toDouble()) }
+            val gustSpeed = hourly.getJSONArray("wind_gusts_10m_icon_seamless").mapToList { if (it == "null") WindSpeed.fromMetersPerSecond(-1.0) else WindSpeed.fromMetersPerSecond(it.toDouble()) }
+            val visibility = hourly.getJSONArray("visibility_best_match").mapToList { if (it == "null") Visibility.fromMeters(-1.0) else Visibility.fromMeters(it.toDouble()) }
+            val humidity = hourly.getJSONArray("relative_humidity_2m_icon_seamless").mapToList { if (it == "null") Humidity(-1.0) else Humidity(it.toDouble()) }
+            val pressure = hourly.getJSONArray("pressure_msl_icon_seamless").mapToList { if (it == "null") Pressure.fromHectopascal(-1.0) else Pressure.fromHectopascal(it.toDouble()) }
             val wetbulb = arrayListOf<Temperature>()
             for (time in times) {
                 wetbulb.add(Temperature.fromDegreesCelsius(-100.0))
